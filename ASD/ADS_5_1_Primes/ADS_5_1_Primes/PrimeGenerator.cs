@@ -10,7 +10,10 @@ namespace ADS_5_1_Primes
     {
         public static int[] GeneratePrimes(int maxValue)
         {
-            return new　int[0];
+            // 素数が生成できない数値の場合、から配列を返す
+            if (maxValue <= 1) return new　int[0];
+
+            return new[] { 2 };
         }
     }
 }

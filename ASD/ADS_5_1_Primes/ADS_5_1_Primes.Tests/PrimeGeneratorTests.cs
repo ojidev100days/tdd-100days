@@ -18,6 +18,23 @@ namespace ADS_5_1_Primes.Tests
         public class _‘f”‚ğ¶¬‚·‚é
         {
             [Fact]
+            public void _2‚ğ“n‚·‚Æ2‚ğ•Ô‚·()
+            {
+                // given, when, then
+                PrimeGenerator.GeneratePrimes(2).Should().Equal(2);
+            }
+
+            [Fact]
+            public void _3‚ğ“n‚·2‚Æ3‚ğ•Ô‚·()
+            {
+                // given, when, then
+                PrimeGenerator.GeneratePrimes(3).Should().Equal(2, 3);
+            }
+        }
+
+        public class _‘f”‚ğ¶¬‚Å‚«‚È‚¢ê‡‚Í‚©‚ç”z—ñ‚ğ•Ô‚·
+        {
+            [Fact]
             public void _1‚ğ“n‚·‚Æ‹ó”z—ñ‚ğ•Ô‚·()
             {
                 // given, when, then
