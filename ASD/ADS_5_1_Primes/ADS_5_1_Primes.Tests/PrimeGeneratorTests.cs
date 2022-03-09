@@ -1,4 +1,4 @@
-using Xunit;
+ï»¿using Xunit;
 using ADS_5_1_Primes;
 using FluentAssertions;
 
@@ -8,37 +8,52 @@ namespace ADS_5_1_Primes.Tests
     namespace PrimeGeneratorTests
     {
         /*
-         * ‘f”i‚»‚·‚¤A‰p: prime numberj‚Æ‚ÍA2 ˆÈã‚Ì©‘R”‚ÅA³‚Ì–ñ”‚ª 1 ‚Æ©•ª©g‚Ì‚İ‚Å‚ ‚é‚à‚Ì‚Ì‚±‚Æ‚Å‚ ‚éB
-         * - [ ] w’è‚µ‚½”’l‚Ü‚Å‚Ì‘f”‚ğ¶¬‚·‚é
-         *   - [ ] 1 ˆÈ‰º‚ğ“n‚·‚Æ [] ‚ğ•Ô‚·
-         *   - [ ] 2 ‚ğ“n‚·‚Æ [2] ‚ğ•Ô‚·
+         * ç´ æ•°ï¼ˆãã™ã†ã€è‹±: prime numberï¼‰ã¨ã¯ã€2 ä»¥ä¸Šã®è‡ªç„¶æ•°ã§ã€æ­£ã®ç´„æ•°ãŒ 1 ã¨è‡ªåˆ†è‡ªèº«ã®ã¿ã§ã‚ã‚‹ã‚‚ã®ã®ã“ã¨ã§ã‚ã‚‹ã€‚
+         * - [ ] æŒ‡å®šã—ãŸæ•°å€¤ã¾ã§ã®ç´ æ•°ã‚’ç”Ÿæˆã™ã‚‹
+         *   - [ ] 1 ä»¥ä¸‹ã‚’æ¸¡ã™ã¨ [] ã‚’è¿”ã™
+         *   - [ ] 2 ã‚’æ¸¡ã™ã¨ [2] ã‚’è¿”ã™
+         * - [ ] nã¾ã§ã®ç´ æ•°
          */
 
 
-        public class _‘f”‚ğ¶¬‚·‚é
+        public class _ç´ æ•°ã‚’ç”Ÿæˆã™ã‚‹
         {
             [Fact]
-            public void _2‚ğ“n‚·‚Æ2‚ğ•Ô‚·()
+            public void _2ã‚’æ¸¡ã™ã¨2ã‚’è¿”ã™()
             {
                 // given, when, then
                 PrimeGenerator.GeneratePrimes(2).Should().Equal(2);
             }
 
             [Fact]
-            public void _3‚ğ“n‚·2‚Æ3‚ğ•Ô‚·()
+            public void _3ã‚’æ¸¡ã™2ã¨3ã‚’è¿”ã™()
             {
                 // given, when, then
                 PrimeGenerator.GeneratePrimes(3).Should().Equal(2, 3);
             }
         }
 
-        public class _‘f”‚ğ¶¬‚Å‚«‚È‚¢ê‡‚Í‚©‚ç”z—ñ‚ğ•Ô‚·
+        public class _ç´ æ•°ã‚’ç”Ÿæˆã§ããªã„å ´åˆã¯ç©ºé…åˆ—ã‚’ç”Ÿæˆã™ã‚‹
         {
-            [Fact]
-            public void _1‚ğ“n‚·‚Æ‹ó”z—ñ‚ğ•Ô‚·()
+            [Theory]
+            [InlineData(-1)]
+            [InlineData(0)]
+            [InlineData(1)]
+            public void _ç©ºé…åˆ—ã‚’è¿”ã™(int value)
             {
                 // given, when, then
-                PrimeGenerator.GeneratePrimes(1).Should().HaveCount(0);
+                PrimeGenerator.GeneratePrimes(value).Should().BeEmpty();
+            }
+        }
+
+        public class _nã¾ã§ã®ç´ æ•°ã‚’æ±‚ã‚ã‚‹
+        {
+            [Fact]
+            public void _100ã‚’æ¸¡ã™ã¨25å€‹ã®ç´ æ•°ã‚’è¿”ã—ï¼’ï¼•ç•ªç›®ã®ç´ æ•°ã¯97ã«ãªã‚‹()
+            {
+                // given, when, then
+                PrimeGenerator.GeneratePrimes(100).Should().HaveCount(25);
+                PrimeGenerator.GeneratePrimes(100)[24].Should().Be(97);
             }
         }
     }
