@@ -29,7 +29,54 @@ namespace ADS_5_1_Primes
             // 素数が生成できない数値の場合、から配列を返す
             if (maxValue <= 1) return new int[0];
 
+            var f = InitializeSieve(maxValue);
+            Sieve(f);
+            var primes = LoadPrimes(f);
+            return primes;
+        }
 
+        private static int[] LoadPrimes(bool[] f)
+        {
+            // 見つけた素数の個数をカウント
+            int count = 0;
+            for (int i = 0; i < f.Length; i++)
+            {
+                if (f[i]) count++;
+            }
+
+            var primes = new int[count];
+
+            // 素数の抜き出し
+            for (int i = 0, j = 0; i < f.Length; i++)
+            {
+                if (f[i]) primes[j++] = i;
+            }
+
+            return primes;
+        }
+
+        private static void Sieve(bool[] f)
+        {
+            // ふるい落とす
+            for (int i = 2; i < Math.Sqrt(f.Length) + 1; i++)
+            {
+                if (f[i])
+                {
+                    // i がのぞかれていなければ、その倍数を除く
+                    for (int j = 2 * i; j < f.Length; j += i)
+                    {
+                        f[j] = false; // 倍数は素数ではない
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 篩の初期化
+        /// </summary>
+        /// <param name="maxValue"></param>
+        private static bool[] InitializeSieve(int maxValue)
+        {
             // 宣言
             var s = maxValue + 1; // 配列のサイズ
             var f = new bool[s];
@@ -44,38 +91,7 @@ namespace ADS_5_1_Primes
             // 周知の非素数を取り除く
             f[0] = f[1] = false;
 
-            // ふるい落とす
-            for (int i = 2; i < Math.Sqrt(s) + 1; i++)
-            {
-                if (f[i])
-                {
-                    // i がのぞかれていなければ、その倍数を除く
-                    for (int j = 2 * i; j < s; j += i)
-                    {
-                        f[j] = false; // 倍数は素数ではない
-                    }
-                }
-            }
-
-            // 見つけた素数の個数をカウント
-            int count = 0;
-            for (int i = 0; i < s; i++)
-            {
-                if (f[i]) count++;
-            }
-
-            var primes = new int[count];
-
-            // 素数の抜き出し
-            for (int i = 0, j=0; i < s; i++)
-            {
-                if (f[i]) primes[j++] = i;
-            }
-
-            return primes;
-
-
-            return new[] { 2 };
+            return f;
         }
     }
 }
