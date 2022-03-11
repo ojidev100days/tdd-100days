@@ -29,69 +29,89 @@ namespace ADS_5_1_Primes
             // 素数が生成できない数値の場合、から配列を返す
             if (maxValue <= 1) return new int[0];
 
-            var f = InitializeSieve(maxValue);
-            Sieve(f);
-            var primes = LoadPrimes(f);
-            return primes;
+            var unCrossed = InitializeArrayOfIntegers(maxValue);
+            CrossOutMultiples(unCrossed);
+            return PutUncrossedIntegersIntoResult(unCrossed);
         }
 
-        private static int[] LoadPrimes(bool[] f)
-        {
-            // 見つけた素数の個数をカウント
-            int count = 0;
-            for (int i = 0; i < f.Length; i++)
-            {
-                if (f[i]) count++;
-            }
-
-            var primes = new int[count];
-
-            // 素数の抜き出し
-            for (int i = 0, j = 0; i < f.Length; i++)
-            {
-                if (f[i]) primes[j++] = i;
-            }
-
-            return primes;
-        }
-
-        private static void Sieve(bool[] f)
-        {
-            // ふるい落とす
-            for (int i = 2; i < Math.Sqrt(f.Length) + 1; i++)
-            {
-                if (f[i])
-                {
-                    // i がのぞかれていなければ、その倍数を除く
-                    for (int j = 2 * i; j < f.Length; j += i)
-                    {
-                        f[j] = false; // 倍数は素数ではない
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// 篩の初期化
         /// </summary>
         /// <param name="maxValue"></param>
-        private static bool[] InitializeSieve(int maxValue)
+        private static bool[] InitializeArrayOfIntegers(int maxValue)
         {
             // 宣言
-            var s = maxValue + 1; // 配列のサイズ
-            var f = new bool[s];
-
+            var isCrossed = new bool[maxValue + 1];
 
             // 配列を true に初期化
-            for (int i = 0; i < f.Length; i++)
+            for (int i = 2; i < isCrossed.Length; i++)
             {
-                f[i] = true;
+                isCrossed[i] = false;
             }
 
-            // 周知の非素数を取り除く
-            f[0] = f[1] = false;
+            return isCrossed;
+        }
 
-            return f;
+        private static void CrossOutMultiples(bool[] isCrossed)
+        {
+
+            // ふるい落とす
+            for (int i = 2; i < CaclMaxPrimeFactor(isCrossed); i++)
+            {
+                if (NotCrossed(isCrossed, i))
+                {
+                    CrossOutMultiplesOf(isCrossed, i);
+                }
+            }
+        }
+
+        private static void CrossOutMultiplesOf(bool[] isCrossed, int i)
+        {
+            // i がのぞかれていなければ、その倍数を除く
+            for (int multiple = 2 * i; multiple < isCrossed.Length; multiple += i)
+            {
+                isCrossed[multiple] = true; // 倍数は素数ではない
+            }
+        }
+
+        private static bool NotCrossed(bool[] isCrossed, int i)
+        {
+            return !isCrossed[i];
+        }
+
+        private static int CaclMaxPrimeFactor(bool[] isCrossed)
+        {
+            // p の倍数をすべて削除する。ただし、p は素数である。
+            // したがって、削除される倍数はすべて、素数因子 p と倍数因子 q をかけ合わせた数として表現できる。
+            // もし、p が配列のサイズの平方根よりも大きい場合は、倍数因子 q が1より大きくなることはあり得ない。
+            // したがって、p は配列に格納されている数の中で最大の素因数であり、同時に繰り返しの上限であることになる
+            return (int)Math.Sqrt(isCrossed.Length) + 1;
+        }
+
+        private static int[] PutUncrossedIntegersIntoResult(bool[] isCrossed)
+        {
+            var primes = new int[NumberOfUnCrossedIntegers(isCrossed)];
+
+            // 素数の抜き出し
+            for (int i = 2, j = 0; i < isCrossed.Length; i++)
+            {
+                if (NotCrossed(isCrossed, i)) primes[j++] = i;
+            }
+
+            return primes;
+        }
+
+        private static int NumberOfUnCrossedIntegers(bool[] isCrossed)
+        {
+            // 見つけた素数の個数をカウント
+            int count = 0;
+            for (int i = 2; i < isCrossed.Length; i++)
+            {
+                if (!isCrossed[i]) count++;
+            }
+
+            return count;
         }
     }
 }
