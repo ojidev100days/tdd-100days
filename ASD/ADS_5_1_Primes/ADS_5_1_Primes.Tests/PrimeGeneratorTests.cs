@@ -1,6 +1,7 @@
 ﻿using Xunit;
 using ADS_5_1_Primes;
 using FluentAssertions;
+using System.Linq;
 
 namespace ADS_5_1_Primes.Tests
 {
@@ -48,6 +49,7 @@ namespace ADS_5_1_Primes.Tests
 
         public class _nまでの素数を求める
         {
+
             [Fact]
             public void _100を渡すと25個の素数を返し２５番目の素数は97になる()
             {
@@ -55,6 +57,30 @@ namespace ADS_5_1_Primes.Tests
                 PrimeGenerator.GeneratePrimes(100).Should().HaveCount(25);
                 PrimeGenerator.GeneratePrimes(100)[24].Should().Be(97);
             }
+
+
+            [Fact]
+            public void _大きい数を渡しても返却されるすべての値は素数になる()
+            {
+                // given, when, then
+                PrimeGenerator.GeneratePrimes(500).Select(IsPrime).All(x => x).Should().BeTrue();
+            }
+
+            /// <summary>
+            /// 素数かどうかを判定する
+            /// </summary>
+            /// <param name="prime">判定する値</param>
+            /// <returns>素数の場合 true。それ以外の場合は false。</returns>
+            private static bool IsPrime(int prime)
+            {
+                for (int factor = 2; factor < prime; factor++)
+                {
+                    // 2 以上 prime 未満で、割り切れる数があれば、それは素数ではない
+                    if (prime % factor == 0) return false;
+                }
+                return true;
+            }
+
         }
     }
 }
