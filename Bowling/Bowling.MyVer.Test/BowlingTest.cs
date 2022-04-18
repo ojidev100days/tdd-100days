@@ -13,13 +13,18 @@ namespace Bowling.MyVer.Test
          * [x] 倒したピンが1の時スコアは1を返す 
          * [x] 倒したピンが1と2の時スコアは3を返す 
        - [ ] 1回で追加できるピンの数は0から10
+         * [x] マイナス値を追加すると例外発生
+         * [ ] 0から10の値を追加すると正常終了
+         * [ ] 11以上の値を追加すると例外発生
        - [ ] 1フレームに2回ピンの数を追加できる
          * [x] 初期状態のフレームNoは1
          * [x] 2回ピンを追加するとフレームNoは2
-         * [ ] 4回ピンを追加するとフレームNoは3
-         * TODO ストライク周りの話が出てきそう
-     - [ ] ピンは10フレームが完了するまで追加できる
-         - [ ] 1フレームで追加で切るピンの数は、2回合わせて0から10。
+         * [x] 4回ピンを追加するとフレームNoは3
+         * [ ] TODO ストライク周りの話が出てきそう
+       - [ ] 1から9フレームは1フレームで追加できるピンの合計数は0から10
+         * TODO
+
+       - 仕様候補
          - [ ] 1フレームの1回目のピンの追加でピンの数が10の場合、2回目のピンの数の追加はできない（ストライク。次のフレームに移る）
          - [ ] 10フレームのみの例外あり
            - [ ] ※後で追記
@@ -132,6 +137,54 @@ namespace Bowling.MyVer.Test
         }
 
 
+        public class _1回で追加できるピンの数は0から10
+        {
+            private readonly Game _target = new Game();
+
+            [Fact]
+            internal void マイナス値を追加すると例外発生()
+            {
+                // Given
+                // When
+                var act = () => _target.Add(-1);
+
+                // Then
+                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(pin=-1)");
+            }
+
+            [Theory]
+            [InlineData(0)]
+            [InlineData(10)]
+            internal void _0から10の値を追加すると正常終了(int pin)
+            {
+                // Given
+                // When
+                var act = () => _target.Add(pin);
+
+                // Then
+                act.Should().NotThrow();
+            }
+
+            [Fact]
+            internal void _11以上の値を追加すると例外発生()
+            {
+                // Given
+                // When
+                var act = () => _target.Add(11);
+
+                // Then
+                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(pin=11)");
+            }
+
+
+        }
+
+        public class _1から9フレームは1フレームで追加できるピンの合計数は0から10
+        {
+            private readonly Game _target = new Game();
+
+            // TODO
+        }
     }
 
     // TODO 今テストが書けないので後で
