@@ -12,12 +12,13 @@ namespace Bowling.MyVer.Test
      *   1フレーム内で倒したピンの数の合計が、そのフレームの得点となる。
      * プレーヤーが1回の投球ですべてのピンを倒すことを「ストライク」と呼ぶ。
      *   「ストライク」となった場合、そのフレームは終了する。
-     *   「ストライク」となった場合、そのフレームの得点は、そのフレームに続く2フレームで倒したピンの数の合計となる。
+     *   「ストライク」となった場合、得点は、その投球に続く２回の投球で倒したピンの数の合計となる。
      * プレーヤーが2回の投球ですべてのピンを倒すことを「スペア」と呼ぶ。
-     *   「スペア」となった場合、そのフレームの得点は、そのフレームに続く1プレームで倒したピンの数の合計となる。
+     *   「スペア」となった場合、得点は、その投球に続く1会の投球で倒したピンの数の合計となる。
      * 10フレーム目で「ストライク」とった場合、「ストライク」の得点を計上するために、プレーヤーはもう2回投球することができる。
      * 10フレーム目で「スペア」とった場合、「スペア」の得点を計上するために、プレーヤーはもう1回投球することができる。
      - [ ] 倒したピンを追加する
+
        - [x] 1回で追加できるピンの数は0から10
          * [x] マイナス値を追加すると例外発生
          * [x] 0から10の値を追加すると正常終了
@@ -65,7 +66,7 @@ namespace Bowling.MyVer.Test
     {
         public class 倒したピンは得点に合算される
         {
-            private readonly Game _target = new Game();
+            private readonly Game _initialState = new Game();
 
             [Fact]
             internal void 初期状態の得点は0()
@@ -73,7 +74,7 @@ namespace Bowling.MyVer.Test
                 // Given
                 // When
                 // Then
-                _target.Score.Should().Be(0);
+                _initialState.GetScore().Should().Be(0);
 
             }
 
@@ -82,10 +83,10 @@ namespace Bowling.MyVer.Test
             {
                 // Given
                 // When
-                _target.Add(0);
+                var target = _initialState.Add(0);
 
                 // Then
-                _target.Score.Should().Be(0);
+                target.GetScore().Should().Be(0);
 
             }
 
@@ -94,10 +95,10 @@ namespace Bowling.MyVer.Test
             {
                 // Given
                 // When
-                _target.Add(1);
+                var target = _initialState.Add(1);
 
                 // Then
-                _target.Score.Should().Be(1);
+                target.GetScore().Should().Be(1);
 
             }
 
@@ -106,11 +107,10 @@ namespace Bowling.MyVer.Test
             {
                 // Given
                 // When
-                _target.Add(1);
-                _target.Add(2);
+                var target = _initialState.Add(1).Add(2);
 
                 // Then
-                _target.Score.Should().Be(3);
+                target.GetScore().Should().Be(3);
             }
 
         }
@@ -118,58 +118,46 @@ namespace Bowling.MyVer.Test
 
         public class _1フレームに2回ピンの数を追加できる
         {
-            private readonly Game _target = new Game();
+            private readonly Game _initialState = new Game();
 
             [Fact]
-            internal void 初期状態のフレームNoは1()
+            internal void 初期状態のフレームNoは0()
             {
                 // Given
                 // When
                 // Then
-                _target.Frame.Should().Be(1);
-
-            }
-
-            [Fact]
-            internal void _2回ピンを追加するとフレームNoは2()
-            {
-                // Given
-                // When
-                _target.Add(1);
-                _target.Add(2);
-
-                // Then
-                _target.Frame.Should().Be(2);
-
-            }
-
-
-            [Fact]
-            internal void _4回ピンを追加するとフレームNoが3()
-            {
-                // Given
-                // When
-                _target.Add(1);
-                _target.Add(2);
-                _target.Add(3);
-                _target.Add(4);
-
-                // Then
-                _target.Frame.Should().Be(3);
+                _initialState.GetFrame().Should().Be(0);
 
             }
 
             [Theory]
-            [InlineData(new int[] { 10 }, 2)]
-            [InlineData(new int[] { 10, 10 }, 3)]
+            [InlineData(new int[] { 1 }, 1)]
+            [InlineData(new int[] { 1, 2 }, 1)]
+            [InlineData(new int[] { 1, 2, 3 }, 2)]
+            [InlineData(new int[] { 1, 2, 3, 4 }, 2)]
+            internal void ストライク以外は2投球に1回フレームが進む(int[] pins, int expectedFrameNo)
+            {
+                // Given
+                // When
+                var target = _initialState.Add(pins);
+
+                // Then
+                target.GetFrame().Should().Be(expectedFrameNo);
+
+            }
+
+            [Theory]
+            [InlineData(new int[] { 10 }, 1)]
+            [InlineData(new int[] { 10, 1 }, 2)]
+            [InlineData(new int[] { 10, 10, 1 }, 3)]
             internal void ストライクを取るとフレームは次に進む(int[] pins, int expectedFrameNo)
             {
                 // Given
                 // When
-                foreach (var pin in pins) _target.Add(pin);
+                var target = _initialState.Add(pins);
 
                 // Then
-                _target.Frame.Should().Be(expectedFrameNo);
+                target.GetFrame().Should().Be(expectedFrameNo);
 
             }
 
@@ -178,17 +166,17 @@ namespace Bowling.MyVer.Test
 
         public class _1回で追加できるピンの数は0から10
         {
-            private readonly Game _target = new Game();
+            private readonly Game _initialState = new Game();
 
             [Fact]
             internal void マイナス値を追加すると例外発生()
             {
                 // Given
                 // When
-                var act = () => _target.Add(-1);
+                var act = () => _initialState.Add(-1);
 
                 // Then
-                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(pin=-1)");
+                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(hitPin=-1)");
             }
 
             [Theory]
@@ -198,7 +186,7 @@ namespace Bowling.MyVer.Test
             {
                 // Given
                 // When
-                var act = () => _target.Add(pin);
+                var act = () => _initialState.Add(pin);
 
                 // Then
                 act.Should().NotThrow();
@@ -209,10 +197,10 @@ namespace Bowling.MyVer.Test
             {
                 // Given
                 // When
-                var act = () => _target.Add(11);
+                var act = () => _initialState.Add(11);
 
                 // Then
-                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(pin=11)");
+                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(hitPin=11)");
             }
 
 
@@ -225,15 +213,15 @@ namespace Bowling.MyVer.Test
 
             public class _1から9フレームは追加できるピンの合計数は10まで
             {
-                private readonly Game _target = new Game();
+                private readonly Game _initialState = new Game();
 
                 [Fact]
                 internal void _1と10の組み合わせで追加すると例外発生()
                 {
                     // Given
                     // When
-                    _target.Add(1);
-                    var act = () => _target.Add(10);
+                    var target = _initialState.Add(1);
+                    var act = () => target.Add(10);
 
                     // Then
                     act.Should().Throw<BowlingAppException>().WithMessage("The total number of pins that can be added in a frame is limited to 10.(currentFrame=0, frame=1, pin=10)");
@@ -244,8 +232,8 @@ namespace Bowling.MyVer.Test
                 {
                     // Given
                     // When
-                    _target.Add(9);
-                    var act = () => _target.Add(2);
+                    var target = _initialState.Add(9);
+                    var act = () => target.Add(2);
 
                     // Then
                     act.Should().Throw<BowlingAppException>().WithMessage("The total number of pins that can be added in a frame is limited to 10.(currentFrame=0, frame=9, pin=2)");
@@ -255,6 +243,8 @@ namespace Bowling.MyVer.Test
         }
 
     }
+
+
 
     // TODO 今テストが書けないので後で
     //namespace 倒したピンの数を追加できる
