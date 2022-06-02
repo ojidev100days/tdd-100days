@@ -74,7 +74,7 @@ namespace Bowling.MyVer.Test
                 // Given
                 // When
                 // Then
-                _initialState.GetScore().Should().Be(0);
+                _initialState.TotalScore.Should().Be(0);
 
             }
 
@@ -86,7 +86,7 @@ namespace Bowling.MyVer.Test
                 var target = _initialState.Add(0);
 
                 // Then
-                target.GetScore().Should().Be(0);
+                target.TotalScore.Should().Be(0);
 
             }
 
@@ -98,7 +98,7 @@ namespace Bowling.MyVer.Test
                 var target = _initialState.Add(1);
 
                 // Then
-                target.GetScore().Should().Be(1);
+                target.TotalScore.Should().Be(1);
 
             }
 
@@ -110,7 +110,7 @@ namespace Bowling.MyVer.Test
                 var target = _initialState.Add(1).Add(2);
 
                 // Then
-                target.GetScore().Should().Be(3);
+                target.TotalScore.Should().Be(3);
             }
 
         }
@@ -121,12 +121,12 @@ namespace Bowling.MyVer.Test
             private readonly Game _initialState = new Game();
 
             [Fact]
-            internal void 初期状態のフレームNoは0()
+            internal void 初期状態のフレームNoは1()
             {
                 // Given
                 // When
                 // Then
-                _initialState.GetFrame().Should().Be(0);
+                _initialState.CurrentFrameNo.Should().Be(1);
 
             }
 
@@ -142,7 +142,7 @@ namespace Bowling.MyVer.Test
                 var target = _initialState.Add(pins);
 
                 // Then
-                target.GetFrame().Should().Be(expectedFrameNo);
+                target.CurrentFrameNo.Should().Be(expectedFrameNo);
 
             }
 
@@ -157,7 +157,7 @@ namespace Bowling.MyVer.Test
                 var target = _initialState.Add(pins);
 
                 // Then
-                target.GetFrame().Should().Be(expectedFrameNo);
+                target.CurrentFrameNo.Should().Be(expectedFrameNo);
 
             }
 
@@ -224,7 +224,7 @@ namespace Bowling.MyVer.Test
                     var act = () => target.Add(10);
 
                     // Then
-                    act.Should().Throw<BowlingAppException>().WithMessage("The total number of pins that can be added in a frame is limited to 10.(currentFrame=0, frame=1, pin=10)");
+                    act.Should().Throw<BowlingAppException>().WithMessage("The total number of pins that can be added in a frame is limited to 10.(frame=[[1]], hitPin=10)");
                 }
 
                 [Fact]
@@ -236,7 +236,7 @@ namespace Bowling.MyVer.Test
                     var act = () => target.Add(2);
 
                     // Then
-                    act.Should().Throw<BowlingAppException>().WithMessage("The total number of pins that can be added in a frame is limited to 10.(currentFrame=0, frame=9, pin=2)");
+                    act.Should().Throw<BowlingAppException>().WithMessage("The total number of pins that can be added in a frame is limited to 10.(frame=[[9]], hitPin=2)");
                 }
             }
 

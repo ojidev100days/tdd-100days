@@ -5,74 +5,39 @@ namespace Bowling.MyVer;
 internal class Game
 {
 
-    private static readonly int[] _emptyHitPins = new int[0];
+    private static readonly Frames _emptyFrames = new Frames();
 
-    private readonly ReadOnlyCollection<int> _hitPins;
+    private readonly Frames _frames;
 
     public Game()
     {
-        _hitPins = new ReadOnlyCollection<int>(_emptyHitPins);
+        _frames = _emptyFrames;
     }
 
-    public Game(ReadOnlyCollection<int> hitPins)
+    public Game(Frames frames) : this()
     {
-        _hitPins = hitPins;
+        _frames = frames;
     }
 
-    public Game(ReadOnlyCollection<int> hitPins, int hitPin)
-    {
-        List<int> addedHitPins = new List<int>(hitPins);
-        addedHitPins.Add(hitPin);
-        _hitPins = new ReadOnlyCollection<int>(addedHitPins);
-    }
+    public int TotalScore => _frames.Score;
 
-    public int GetScore()
-    {
-
-
-        return _hitPins.Sum(x => x);
-    }
-
-
-    public int GetFrame()
-    {
-        int frame = 0;
-        bool isFirstInFrame = true; // フレーム中の最初の投球かどうかを判定するフラグ
-        foreach (var hitPin in _hitPins)
-        {
-            if (isFirstInFrame)
-            {
-                frame++;
-                isFirstInFrame = (hitPin == 10); // ストライクの場合、最初の投球のまま。それ以外は次の投球とする
-            }
-            else
-            {
-                // フレーム中の最初の投球でなければ、2投目、ということなので、次のフレームに移る
-                // TODO １０フレーム目の場合、特殊処理あり
-                isFirstInFrame = true;
-            }
-        }
-        return frame;
-    }
-
-    private int _addCount = 0;
-
-    private int _currentFrame = 0;
-
+    public int CurrentFrameNo => _frames.Count;
 
     internal Game Add(int hitPin)
     {
         if (hitPin < 0 || 10 < hitPin) throw new BowlingAppException($"The number of pins that can be added at one time is 0-10.(hitPin={hitPin})");
-        //        if (10 < _frames[_currentFrame] + pin) throw new BowlingAppException($"The total number of pins that can be added in a frame is limited to 10.(currentFrame={_currentFrame}, frame={_frames[_currentFrame]}, pin={pin})");
 
-        return new Game(_hitPins, hitPin);
+        var newFrames = (_frames.Current.CanBeAdded)
+            ? new Frames(_frames.Take(_frames.Count - 1).Concat(new Frame[] { _frames.Current.Add(hitPin) }))
+            : new Frames(_frames.Concat(new Frame[] { new Frame(hitPin) }));
+        return new Game(newFrames);
     }
 
     internal Game Add(int[] pins)
     {
         // TODO 処理効率が悪いので、要検討
         var newGame = this;
-        foreach(var pin in pins)
+        foreach (var pin in pins)
         {
             newGame = newGame.Add(pin);
         }
