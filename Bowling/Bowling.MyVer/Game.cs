@@ -27,9 +27,11 @@ internal class Game
     {
         if (hitPin < 0 || 10 < hitPin) throw new BowlingAppException($"The number of pins that can be added at one time is 0-10.(hitPin={hitPin})");
 
-        var newFrames = (_frames.Current.CanBeAdded)
-            ? new Frames(_frames.Take(_frames.Count - 1).Concat(new Frame[] { _frames.Current.Add(hitPin) }))
-            : new Frames(_frames.Concat(new Frame[] { new Frame(hitPin) }));
+
+        var addedCcurrentFrame = _frames.Current.Add(hitPin);
+        var newFrames = addedCcurrentFrame.CanBeAdded
+            ? new Frames(_frames.Take(_frames.Count - 1).Concat(new Frame[] { addedCcurrentFrame })) // CurrentFrameの入れ替え
+            : new Frames(_frames.Take(_frames.Count - 1).Concat(new Frame[] { addedCcurrentFrame, new Frame() })); //  CurrentFrameの入れ替え&新しいフレームの用意
         return new Game(newFrames);
     }
 

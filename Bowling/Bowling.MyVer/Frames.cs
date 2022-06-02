@@ -35,5 +35,10 @@ namespace Bowling.MyVer
         {
             return GetEnumerator();
         }
+
+        public override string ToString()
+        {
+            return "[" + string.Join(",", _frames) + "]";
+        }
     }
 }

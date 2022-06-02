@@ -17,6 +17,8 @@ namespace Bowling.MyVer.Test
      *   「スペア」となった場合、得点は、その投球に続く1会の投球で倒したピンの数の合計となる。
      * 10フレーム目で「ストライク」とった場合、「ストライク」の得点を計上するために、プレーヤーはもう2回投球することができる。
      * 10フレーム目で「スペア」とった場合、「スペア」の得点を計上するために、プレーヤーはもう1回投球することができる。
+     */
+    /*
      - [ ] 倒したピンを追加する
 
        - [x] 1回で追加できるピンの数は0から10
@@ -29,9 +31,9 @@ namespace Bowling.MyVer.Test
          * [x] 9と2の組み合わせで追加すると例外発生
 
        - [ ] 1フレームに2回ピンの数を追加できる
-         * [x] 初期状態のフレームNoは1
-         * [x] 2回ピンを追加するとフレームNoは2
-         * [x] 4回ピンを追加するとフレームNoは3
+         * [x] 初期状態のフレームNoは0
+         * [x] 2回ピンを追加するとフレームNoは1
+         * [x] 4回ピンを追加するとフレームNoは2
          * [x] ストライクを取るとフレームは次に進む
 
      - [ ] 得点を計算する
@@ -132,9 +134,9 @@ namespace Bowling.MyVer.Test
 
             [Theory]
             [InlineData(new int[] { 1 }, 1)]
-            [InlineData(new int[] { 1, 2 }, 1)]
+            [InlineData(new int[] { 1, 2 }, 2)]
             [InlineData(new int[] { 1, 2, 3 }, 2)]
-            [InlineData(new int[] { 1, 2, 3, 4 }, 2)]
+            [InlineData(new int[] { 1, 2, 3, 4 }, 3)]
             internal void ストライク以外は2投球に1回フレームが進む(int[] pins, int expectedFrameNo)
             {
                 // Given
@@ -147,7 +149,7 @@ namespace Bowling.MyVer.Test
             }
 
             [Theory]
-            [InlineData(new int[] { 10 }, 1)]
+            [InlineData(new int[] { 10 }, 2)]
             [InlineData(new int[] { 10, 1 }, 2)]
             [InlineData(new int[] { 10, 10, 1 }, 3)]
             internal void ストライクを取るとフレームは次に進む(int[] pins, int expectedFrameNo)
