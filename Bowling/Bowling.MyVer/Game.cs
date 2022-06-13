@@ -19,7 +19,29 @@ internal class Game
         _frames = frames;
     }
 
-    public int TotalScore => _frames.Score;
+    public int TotalScore
+    {
+        get
+        {
+            int totalScore = 0;
+            for (int i = 0; i < _frames.Count; i++)
+            {
+                var frame = this._frames[i];
+                if (frame.IsStrike)
+                {
+                    // ストライクの場合、次の2回文の投球がなければ、スコアの計算を打ち切り
+                    if (this._frames.GetNumberOfThrowsFrom(i) < 2) break;
+
+                    totalScore += frame.PinCount + _frames.GetNumberOfPinsFrom(i, 2);
+                }
+                else
+                {
+                    totalScore += frame.PinCount;
+                }
+            }
+            return totalScore;
+        }
+    }
 
     public int CurrentFrameNo => _frames.Count;
 
@@ -30,8 +52,8 @@ internal class Game
 
         var addedCcurrentFrame = _frames.Current.Add(hitPin);
         var newFrames = addedCcurrentFrame.CanBeAdded
-            ? new Frames(_frames.Take(_frames.Count - 1).Concat(new Frame[] { addedCcurrentFrame })) // CurrentFrameの入れ替え
-            : new Frames(_frames.Take(_frames.Count - 1).Concat(new Frame[] { addedCcurrentFrame, new Frame() })); //  CurrentFrameの入れ替え&新しいフレームの用意
+            ? _frames.ChangeCurrentFrame(addedCcurrentFrame) // CurrentFrameの入れ替え
+            : _frames.ChangeCurrentFrame(addedCcurrentFrame).Add(new Frame()); //  CurrentFrameの入れ替え&新しいフレームの用意
         return new Game(newFrames);
     }
 

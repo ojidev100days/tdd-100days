@@ -22,7 +22,14 @@
             }
         }
 
-        public int Score => _pins.Sum();
+
+        public int PinCount => _pins.Sum();
+
+        public bool IsStrike => _pins.Length == 1 && _pins[0] == 10;
+
+        public int ThrowCount => _pins.Length;
+
+        public IEnumerable<int> HitPins => _pins;
 
         internal Frame Add(int hitPin)
         {
@@ -38,7 +45,6 @@
             newPins[_pins.Length] = hitPin;
             return new Frame(newPins);
         }
-
 
         public override string ToString()
         {
