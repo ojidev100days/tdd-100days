@@ -40,7 +40,7 @@ namespace Bowling.MyVer
             var hitPins = GetHitPinsFrom(frameIndex).ToArray();
 
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < times; i++)
             {
                 numberOfPins += hitPins[i];
             }

@@ -254,110 +254,156 @@ namespace Bowling.MyVer.Test
     }
 
 
-    namespace フレームの得点を計算する
+    namespace ストライクとスペア以外の得点を計算する
     {
-        namespace ストライク以外
+        public class 倒したピンは得点に合算される
         {
-            public class 倒したピンは得点に合算される
+            private readonly Game _initialState = new();
+
+            [Fact]
+            internal void 初期状態の得点は0()
             {
-                private readonly Game _initialState = new();
-
-                [Fact]
-                internal void 初期状態の得点は0()
-                {
-                    // Given
-                    // When
-                    // Then
-                    _initialState.TotalScore.Should().Be(0);
-
-                }
-
-                [Fact]
-                internal void 倒したピンが0の時得点は0を返す()
-                {
-                    // Given
-                    // When
-                    var target = _initialState.Add(0);
-
-                    // Then
-                    target.TotalScore.Should().Be(0);
-
-                }
-
-                [Fact]
-                internal void 倒したピンが1の時得点は1を返す()
-                {
-                    // Given
-                    // When
-                    var target = _initialState.Add(1);
-
-                    // Then
-                    target.TotalScore.Should().Be(1);
-
-                }
-
-                [Fact]
-                internal void 倒したピンが1と2の時得点は3を返す()
-                {
-                    // Given
-                    // When
-                    var target = _initialState.Add(1).Add(2);
-
-                    // Then
-                    target.TotalScore.Should().Be(3);
-                }
+                // Given
+                // When
+                // Then
+                _initialState.TotalScore.Should().Be(0);
 
             }
 
-        }
-        namespace ストライク
-        {
-            public class ストライクのスコアは後の２回の投球を加算する
+            [Theory]
+            [InlineData(new[] { 0 }, 0, "(TDB)")]
+            [InlineData(new[] { 1 }, 0, "(TDB)")]
+            [InlineData(new[] { 9 }, 0, "(TDB)")]
+            [InlineData(new[] { 1, 2, 3 }, 3, "(1+2) + (TDB)")]
+            [InlineData(new[] { 1, 2, 3, 4 }, 10, "(1+2) + (3+4)")]
+            internal void 完了していないフレームのスコアは計算しない(int[] hitPins, int expectTotalScore, string because)
             {
-                private readonly Game _initialState = new();
+                // Given
+                // When
+                var target = _initialState.Add(hitPins);
 
-                [Fact]
-                internal void ストライク後の投球なしの時は得点は0を返す()
-                {
-                    // Given
-                    // When
-                    var target = _initialState.Add(10);
+                // Then
+                target.TotalScore.Should().Be(expectTotalScore, because);
 
-                    // Then
-                    target.TotalScore.Should().Be(0);
-                }
-
-                [Fact]
-                internal void ストライク後の投球が1回の時は得点は0を返す()
-                {
-                    // Given
-                    // When
-                    var target = _initialState.Add(10).Add(1);
-
-                    // Then
-                    target.TotalScore.Should().Be(0);
-                }
-
-                [Theory]
-                [InlineData(new int[] { 10, 1, 2 }, 16, "Strike(10+1+2) + (1+2)")]
-                [InlineData(new int[] { 10, 10, 2 }, 22, "Strike(10+10+2) + Strike(TBD)")]
-                [InlineData(new int[] { 10, 10, 2, 3 }, 42, "Strike(10+10+2) + Strike(10+2+3) + (2+3)")]
-                [InlineData(new int[] { 10, 10, 10 }, 30, "Strike(10+10+2) + Strike(TBD) + Strike(TBD)")]
-                [InlineData(new int[] { 10, 10, 10, 3 }, 53, "Strike(10+10+10) + Strike(10+10+3) + Strike(TBD)")]
-                [InlineData(new int[] { 10, 10, 10, 3, 4 }, 77, "Strike(10+10+10) + Strike(10+10+3) + Strike(10+3+4) + (3+4)")]
-                [InlineData(new int[] { 10, 10, 10, 10 }, 60, "Strike(10+10+10) + Strike(10+10+10) + Strike(TDB)")]
-                [InlineData(new int[] { 10, 10, 10, 10, 4 }, 84, "Strike(10+10+10) + Strike(10+10+10) + Strike(10+10+4), Strike(TDB)")]
-                [InlineData(new int[] { 10, 10, 10, 10, 4, 5 }, 112, "Strike(10+10+10) + Strike(10+10+10) + Strike(10+10+4), Strike(10+4+5) + (4+5)")]
-                internal void ストライクのスコアに後の2回の投球を加算する(int[] hitPins, int expectTotalScore, string because)
-                {
-                    // Given
-                    // When
-                    var target = _initialState.Add(hitPins);
-
-                    // Then
-                    target.TotalScore.Should().Be(expectTotalScore, because); 
-                }
             }
         }
+    }
+
+    namespace ストライクとスペアの得点を計算する
+    {
+        public class ストライクのスコアは後の2回の投球を加算する
+        {
+            private readonly Game _initialState = new();
+
+            [Fact]
+            internal void ストライク後の投球なしの時は得点は0を返す()
+            {
+                // Given
+                // When
+                var target = _initialState.Add(10);
+
+                // Then
+                target.TotalScore.Should().Be(0);
+            }
+
+            [Fact]
+            internal void ストライク後の投球が1回の時は得点は0を返す()
+            {
+                // Given
+                // When
+                var target = _initialState.Add(10).Add(1);
+
+                // Then
+                target.TotalScore.Should().Be(0);
+            }
+
+            [Theory]
+            [InlineData(new int[] { 10, 1, 2 }, 16, "Strike(10+1+2) + (1+2)")]
+            [InlineData(new int[] { 10, 0, 1 }, 12, "Strike(10+0+1) + (0+1)")]
+            [InlineData(new int[] { 10, 0, 0 }, 10, "Strike(10+0+0) + (0+0)")]
+            [InlineData(new int[] { 10, 10, 2 }, 22, "Strike(10+10+2) + Strike(TBD)")]
+            [InlineData(new int[] { 10, 10, 2, 3 }, 42, "Strike(10+10+2) + Strike(10+2+3) + (2+3)")]
+            [InlineData(new int[] { 10, 10, 10 }, 30, "Strike(10+10+2) + Strike(TBD) + Strike(TBD)")]
+            [InlineData(new int[] { 10, 10, 10, 3 }, 53, "Strike(10+10+10) + Strike(10+10+3) + Strike(TBD)")]
+            [InlineData(new int[] { 10, 10, 10, 3, 4 }, 77, "Strike(10+10+10) + Strike(10+10+3) + Strike(10+3+4) + (3+4)")]
+            [InlineData(new int[] { 10, 10, 10, 10 }, 60, "Strike(10+10+10) + Strike(10+10+10) + Strike(TDB)")]
+            [InlineData(new int[] { 10, 10, 10, 10, 4 }, 84, "Strike(10+10+10) + Strike(10+10+10) + Strike(10+10+4), Strike(TDB)")]
+            [InlineData(new int[] { 10, 10, 10, 10, 4, 5 }, 112, "Strike(10+10+10) + Strike(10+10+10) + Strike(10+10+4), Strike(10+4+5) + (4+5)")]
+            internal void ストライクは後の2回の投球を加算する(int[] hitPins, int expectTotalScore, string because)
+            {
+                // Given
+                // When
+                var target = _initialState.Add(hitPins);
+
+                // Then
+                target.TotalScore.Should().Be(expectTotalScore, because);
+            }
+
+
+            [Theory]
+            [InlineData(new int[] { 10, 1, 9 }, 20, "Strike(10+1+9) + Spare(TBD)")]
+            [InlineData(new int[] { 10, 1, 9, 1 }, 31, "Strike(10+1+9) + Spare(1+9+1) + (TDB)")]
+            internal void ストライクの後がスペアでもストライクは後の2回の投球を加算する(int[] hitPins, int expectTotalScore, string because)
+            {
+                // Given
+                // When
+                var target = _initialState.Add(hitPins);
+
+                // Then
+                target.TotalScore.Should().Be(expectTotalScore, because);
+            }
+
+        }
+
+        public class スペアのスコアは後の1回の投球を加算する
+        {
+            private readonly Game _initialState = new();
+
+            [Fact]
+            internal void スペア後の投球なしの時は得点は0を返す()
+            {
+                // Given
+                // When
+                var target = _initialState.Add(1, 9);
+
+                // Then
+                target.TotalScore.Should().Be(0);
+            }
+
+            [Theory]
+            [InlineData(new int[] { 1, 9, 1 }, 11, "Spare(1+9+1) + (TBD)")]
+            [InlineData(new int[] { 1, 9, 0 }, 10, "Spare(1+9+0) + (TBD)")]
+            [InlineData(new int[] { 1, 9, 1, 2 }, 14, "Spare(1+9+1) + (1+2)")]
+            [InlineData(new int[] { 1, 9, 0, 1 }, 11, "Spare(1+9+0) + (0+1)")]
+            [InlineData(new int[] { 1, 9, 1, 0 }, 12, "Spare(1+9+1) + (1+0)")]
+            [InlineData(new int[] { 1, 9, 1, 9 }, 11, "Spare(1+9+1) + Spare(TBD)")]
+            [InlineData(new int[] { 1, 9, 1, 9, 1 }, 22, "Spare(1+9+1) + Spare(1+9+1) + (TDB)")]
+            internal void スペアは後の1回の投球を加算する(int[] hitPins, int expectTotalScore, string because)
+            {
+                // Given
+                // When
+                var target = _initialState.Add(hitPins);
+
+                // Then
+                target.TotalScore.Should().Be(expectTotalScore, because);
+            }
+
+
+            [Theory]
+            [InlineData(new int[] { 1, 9, 10 }, 20, "Spare(1+9+10) + Strike(TBD)")]
+            [InlineData(new int[] { 1, 9, 10, 1 }, 20, "Spare(1+9+10) + Strike(TBD)")]
+            [InlineData(new int[] { 1, 9, 10, 1, 2 }, 36, "Spare(1+9+10) + Strike(10+1+2) + (1+2)")]
+            internal void スペアの後がストライクでもスペアは後の1回の投球を加算する(int[] hitPins, int expectTotalScore, string because)
+            {
+                // Given
+                // When
+                var target = _initialState.Add(hitPins);
+
+                // Then
+                target.TotalScore.Should().Be(expectTotalScore, because);
+            }
+
+        }
+
     }
 }

@@ -27,12 +27,22 @@ internal class Game
             for (int i = 0; i < _frames.Count; i++)
             {
                 var frame = this._frames[i];
+                // フレーム内の投球が完了していない場合は、スコアの計算を打ち切り
+                if (!frame.IsComplite) break;
+
                 if (frame.IsStrike)
                 {
-                    // ストライクの場合、次の2回文の投球がなければ、スコアの計算を打ち切り
+                    // ストライクの場合、次の2回分の投球がなければ、スコアの計算を打ち切り
                     if (this._frames.GetNumberOfThrowsFrom(i) < 2) break;
 
                     totalScore += frame.PinCount + _frames.GetNumberOfPinsFrom(i, 2);
+                }
+                else if (frame.IsSpare)
+                {
+                    // スペアの場合、次の1回分の投球がなければ、スコアの計算を打ち切り
+                    if (this._frames.GetNumberOfThrowsFrom(i) < 1) break;
+
+                    totalScore += frame.PinCount + _frames.GetNumberOfPinsFrom(i, 1);
                 }
                 else
                 {
@@ -57,7 +67,7 @@ internal class Game
         return new Game(newFrames);
     }
 
-    internal Game Add(int[] pins)
+    internal Game Add(params int[] pins)
     {
         // TODO 処理効率が悪いので、要検討
         var newGame = this;

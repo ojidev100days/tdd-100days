@@ -25,11 +25,16 @@
 
         public int PinCount => _pins.Sum();
 
+        public bool IsComplite => IsStrike || _pins.Length == 2;
+
         public bool IsStrike => _pins.Length == 1 && _pins[0] == 10;
+
+        public bool IsSpare => _pins.Length == 2 && _pins.Sum() == 10;
 
         public int ThrowCount => _pins.Length;
 
         public IEnumerable<int> HitPins => _pins;
+
 
         internal Frame Add(int hitPin)
         {
