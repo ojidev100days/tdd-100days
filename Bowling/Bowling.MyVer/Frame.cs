@@ -38,7 +38,7 @@
 
         internal Frame Add(int hitPin)
         {
-            if (!CanBeAdded) throw new BadImageFormatException($"Cannot be added. frame={this}");
+            if (!CanBeAdded) throw new BowlingAppException($"Cannot be added. frame={this}, hitPin={hitPin}");
 
             if (10 < _pins.Sum(x => x) + hitPin)
             {

@@ -77,4 +77,20 @@ internal class Game
         }
         return newGame;
     }
+
+    internal Game Add(Frame frame)
+    {
+        return new Game(_frames.Add(frame));
+    }
+
+    internal Game Add(params Frame[] frames)
+    {
+        var newGame = this;
+        foreach (var frame in frames)
+        {
+            newGame = newGame.Add(frame);
+        }
+        return newGame;
+    }
+
 }

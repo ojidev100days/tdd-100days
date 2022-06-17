@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using Xunit;
 
 namespace Bowling.MyVer.Test
@@ -21,7 +22,7 @@ namespace Bowling.MyVer.Test
      * 10フレーム目で「スペア」とった場合、「スペア」の得点を計上するために、プレーヤーはもう1回投球することができる。
      */
     /*
-     - [ ] 倒したピンを追加する
+     - [x] 倒したピンを追加する
        - [x] 1回で追加できるピンの数は0から10
          * [x] マイナス値を追加すると例外発生
          * [x] 0から10の値を追加すると正常終了
@@ -38,22 +39,22 @@ namespace Bowling.MyVer.Test
            * [x] ストライクを取るとフレームは次に進む
 
 
-     - [ ] 得点を計算する
-       - [ ] ストライク以外
-         - [ ] 倒したピンは得点に合算される
+     - [x] 得点を計算する
+       - [x] ストライク以外
+         - [x] 倒したピンは得点に合算される
            * [x] 初期状態の得点は0
            * [x] 倒したピンが0の時得点は0を返す
            * [x] 倒したピンが1の時得点は1を返す 
            * [x] 倒したピンが1と2の時得点は3を返す 
-       - [ ] ストライクの場合
-         * [ ] その投球に続く２回の投球で倒したピンの数の合計となる
-         * [ ] その投球に続く２回の投球がまだない場合、スコアは0とする
-       - [ ] スペアの場合
-         * [ ] TODO:検討する
+       - [x] ストライクの場合
+         * [x] その投球に続く２回の投球で倒したピンの数の合計となる
+         * [x] その投球に続く２回の投球がまだない場合、スコアは0とする
+       - [x] スペアの場合
 
-       - [ ] 10フレームのみの例外
-         - [ ] ストライクを取るともう2回ピンを追加できる
-         - [ ] スペアをとるともう1回ピンを追加できる
+     - [ ] 10フレームのみ
+       - [ ] ストライクを取るともう2回ピンを追加できる
+       - [ ] スペアをとるともう1回ピンを追加できる
+       - [ ] 上記以外は2回便を追加できる。
 
          * TODO
 
@@ -404,6 +405,83 @@ namespace Bowling.MyVer.Test
             }
 
         }
+
+    }
+
+    namespace 最終フレームの得点を計算する
+    {
+
+        public class ストライクを取るともう2回ピンを追加できる
+        {
+            private readonly Game _initialState = new();
+
+            private readonly Frame _gutter = new Frame(0, 0);
+
+            [Fact]
+            internal void ストライク後の投球なしの時は得点は0を返す()
+            {
+
+                throw new NotImplementedException("ピンの追加問題を可決してから");
+
+                // Given
+                // When
+                var target = _initialState.Add(_gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter); // 9フレームまでgutter
+                target = target.Add(10);
+
+                // Then
+                target.TotalScore.Should().Be(0);
+            }
+
+            //[Fact]
+            internal void ストライク後の投球が1回の時は得点は0を返す()
+            {
+                // Given
+                // When
+                var target = _initialState.Add(10).Add(1);
+
+                // Then
+                target.TotalScore.Should().Be(0);
+            }
+
+            //[Theory]
+            [InlineData(new int[] { 10, 1, 2 }, 16, "Strike(10+1+2) + (1+2)")]
+            [InlineData(new int[] { 10, 0, 1 }, 12, "Strike(10+0+1) + (0+1)")]
+            [InlineData(new int[] { 10, 0, 0 }, 10, "Strike(10+0+0) + (0+0)")]
+            [InlineData(new int[] { 10, 10, 2 }, 22, "Strike(10+10+2) + Strike(TBD)")]
+            [InlineData(new int[] { 10, 10, 2, 3 }, 42, "Strike(10+10+2) + Strike(10+2+3) + (2+3)")]
+            [InlineData(new int[] { 10, 10, 10 }, 30, "Strike(10+10+2) + Strike(TBD) + Strike(TBD)")]
+            [InlineData(new int[] { 10, 10, 10, 3 }, 53, "Strike(10+10+10) + Strike(10+10+3) + Strike(TBD)")]
+            [InlineData(new int[] { 10, 10, 10, 3, 4 }, 77, "Strike(10+10+10) + Strike(10+10+3) + Strike(10+3+4) + (3+4)")]
+            [InlineData(new int[] { 10, 10, 10, 10 }, 60, "Strike(10+10+10) + Strike(10+10+10) + Strike(TDB)")]
+            [InlineData(new int[] { 10, 10, 10, 10, 4 }, 84, "Strike(10+10+10) + Strike(10+10+10) + Strike(10+10+4), Strike(TDB)")]
+            [InlineData(new int[] { 10, 10, 10, 10, 4, 5 }, 112, "Strike(10+10+10) + Strike(10+10+10) + Strike(10+10+4), Strike(10+4+5) + (4+5)")]
+            internal void ストライクは後の2回の投球を加算する(int[] hitPins, int expectTotalScore, string because)
+            {
+                // Given
+                // When
+                var target = _initialState.Add(hitPins);
+
+                // Then
+                target.TotalScore.Should().Be(expectTotalScore, because);
+            }
+
+
+            //[Theory]
+            [InlineData(new int[] { 10, 1, 9 }, 20, "Strike(10+1+9) + Spare(TBD)")]
+            [InlineData(new int[] { 10, 1, 9, 1 }, 31, "Strike(10+1+9) + Spare(1+9+1) + (TDB)")]
+            internal void ストライクの後がスペアでもストライクは後の2回の投球を加算する(int[] hitPins, int expectTotalScore, string because)
+            {
+                // Given
+                // When
+                var target = _initialState.Add(hitPins);
+
+                // Then
+                target.TotalScore.Should().Be(expectTotalScore, because);
+            }
+
+
+        }
+
 
     }
 }
