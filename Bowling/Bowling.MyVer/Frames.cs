@@ -3,35 +3,62 @@ using System.Collections.ObjectModel;
 
 namespace Bowling.MyVer
 {
-    internal class Frames : IEnumerable<Frame>
+    internal class Frames : IEnumerable<IFrame>
     {
-        private static readonly ReadOnlyCollection<Frame> _emptyFrames = new ReadOnlyCollection<Frame>(new Frame[] { new Frame() });
-        private readonly ReadOnlyCollection<Frame> _frames;
+        private static readonly ReadOnlyCollection<IFrame> _emptyFrames = new(Array.Empty<IFrame>());
+        private readonly ReadOnlyCollection<IFrame> _frames;
 
         public int Count => _frames.Count;
-        public Frame Current => _frames[^1];
+        public IFrame Current => _frames.Count == 0 ? NormalFrame.Empty : _frames[^1];
 
-        public Frame this[int i] => _frames[i];
+        public IFrame this[int i] => _frames[i];
 
         public Frames()
         {
             _frames = _emptyFrames;
         }
 
-        internal Frames ChangeCurrentFrame(Frame addedCcurrentFrame)
+        public Frames(IEnumerable<IFrame> frames)
         {
-            return new Frames(_frames.Take(_frames.Count - 1).Concat(new Frame[] { addedCcurrentFrame }));
+            _frames = frames.ToList().AsReadOnly();
+        }
+
+        public Frames(params IFrame[] frames)
+        {
+            _frames = new ReadOnlyCollection<IFrame>(frames);
+        }
+
+        public Frames(IList<IFrame> frames)
+        {
+            _frames = new ReadOnlyCollection<IFrame>(frames);
+        }
+
+
+        internal Frames ChangeCurrentFrame(IFrame addedCcurrentFrame)
+        {
+            return new Frames(_frames.Take(_frames.Count - 1).Concat(new IFrame[] { addedCcurrentFrame }));
         }
 
 
         internal int GetNumberOfThrowsFrom(int frameIndex)
         {
             int numberOfThrows = 0;
-            for (int i = frameIndex+1; i < _frames.Count; i++)
+            if (frameIndex == 9)
             {
-                numberOfThrows += _frames[i].ThrowCount;
+                // TODO 間違ったロジック
+                // この処理は、Strike or Spear を取った後の投球数を知りたいので、
+                // 引数が frameIndex 担っていることが間違い
+                // （10 Frame のパターンに対応できていない
+                return _frames[frameIndex].ThrowCount - 1;
+
+            } else
+            {
+                for (int i = frameIndex + 1; i < _frames.Count; i++)
+                {
+                    numberOfThrows += _frames[i].ThrowCount;
+                }
+                return numberOfThrows;
             }
-            return numberOfThrows;
         }
 
         internal int GetNumberOfPinsFrom(int frameIndex, int times)
@@ -40,11 +67,27 @@ namespace Bowling.MyVer
             var hitPins = GetHitPinsFrom(frameIndex).ToArray();
 
 
-            for (int i = 0; i < times; i++)
+            if (frameIndex == 9)
             {
-                numberOfPins += hitPins[i];
+                // TODO 間違ったロジック
+                // この処理は、Strike or Spear を取った後の投球数を知りたいので、
+                // 引数が frameIndex 担っていることが間違い
+                // （10 Frame のパターンに対応できていない
+                var lastFrame = _frames[frameIndex];
+
+                if (lastFrame.IsStrike) return lastFrame.HitPins.Skip(1).Take(times).Sum();
+                if (lastFrame.IsSpare) return lastFrame.HitPins.Skip(2).Take(times).Sum();
+                return 0;
+
             }
-            return numberOfPins;
+            else
+            {
+                for (int i = 0; i < times; i++)
+                {
+                    numberOfPins += hitPins[i];
+                }
+                return numberOfPins;
+            }
         }
 
         private IEnumerable<int> GetHitPinsFrom(int frameIndex)
@@ -60,18 +103,14 @@ namespace Bowling.MyVer
             }
         }
 
-        internal Frames Add(Frame frame)
+        internal Frames Add(IFrame frame)
         {
-            return new Frames(_frames.Concat(new Frame[] { frame }));
-        }
-
-        public Frames(IEnumerable<Frame> frames)
-        {
-            _frames = frames.ToList().AsReadOnly();
+            if (10 <= _frames.Count) throw new BowlingAppException($"Cannot add a frame. frames.Count={_frames.Count}");
+            return new Frames(_frames.Concat(new IFrame[] { frame }));
         }
 
 
-        public IEnumerator<Frame> GetEnumerator()
+        public IEnumerator<IFrame> GetEnumerator()
         {
             return _frames.GetEnumerator();
         }

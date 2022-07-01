@@ -53,18 +53,24 @@ internal class Game
         }
     }
 
-    public int CurrentFrameNo => _frames.Count;
+    public int FrameCount =>  _frames.Count;
 
     internal Game Add(int hitPin)
     {
         if (hitPin < 0 || 10 < hitPin) throw new BowlingAppException($"The number of pins that can be added at one time is 0-10.(hitPin={hitPin})");
 
-
-        var addedCcurrentFrame = _frames.Current.Add(hitPin);
-        var newFrames = addedCcurrentFrame.CanBeAdded
-            ? _frames.ChangeCurrentFrame(addedCcurrentFrame) // CurrentFrameの入れ替え
-            : _frames.ChangeCurrentFrame(addedCcurrentFrame).Add(new Frame()); //  CurrentFrameの入れ替え&新しいフレームの用意
+        var currentFrame = _frames.Current;
+        var newFrames = currentFrame.CanBeAddPin
+            ? _frames.ChangeCurrentFrame(currentFrame.Add(hitPin)) // CurrentFrameの入れ替え
+            : _frames.Add(CreateNewFrame(_frames.Count, hitPin)); //  新しいフレームの用意
         return new Game(newFrames);
+    }
+
+    private IFrame CreateNewFrame(int count, int hitPin)
+    {
+        return count < 9
+            ? new NormalFrame(hitPin)
+            : new LastFrame(hitPin);
     }
 
     internal Game Add(params int[] pins)
@@ -78,12 +84,12 @@ internal class Game
         return newGame;
     }
 
-    internal Game Add(Frame frame)
+    internal Game Add(NormalFrame frame)
     {
         return new Game(_frames.Add(frame));
     }
 
-    internal Game Add(params Frame[] frames)
+    internal Game Add(params NormalFrame[] frames)
     {
         var newGame = this;
         foreach (var frame in frames)

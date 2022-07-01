@@ -117,25 +117,26 @@ namespace Bowling.MyVer.Test
         {
             namespace ストライク以外
             {
-                public class ピンを2回倒すと次のフレームに進む
+                public class フレームには２回分の投球を含めることができる
                 {
                     private readonly Game _initialState = new Game();
 
                     [Fact]
-                    internal void 初期状態のフレームNoは1()
+                    internal void 初期状態のフレームの数は0()
                     {
                         // Given
                         // When
                         // Then
-                        _initialState.CurrentFrameNo.Should().Be(1);
+                        _initialState.FrameCount.Should().Be(0);
 
                     }
 
                     [Theory]
                     [InlineData(new int[] { 1 }, 1)]
-                    [InlineData(new int[] { 1, 2 }, 2)]
+                    [InlineData(new int[] { 1, 2 }, 1)]
                     [InlineData(new int[] { 1, 2, 3 }, 2)]
-                    [InlineData(new int[] { 1, 2, 3, 4 }, 3)]
+                    [InlineData(new int[] { 1, 2, 3, 4 }, 2)]
+                    [InlineData(new int[] { 1, 2, 3, 4, 5 }, 3)]
                     internal void ピンを2回倒すごとにフレームが進む(int[] pins, int expectedFrameNo)
                     {
                         // Given
@@ -143,29 +144,14 @@ namespace Bowling.MyVer.Test
                         var target = _initialState.Add(pins);
 
                         // Then
-                        target.CurrentFrameNo.Should().Be(expectedFrameNo);
-
-                    }
-
-                    [Theory]
-                    [InlineData(new int[] { 10 }, 2)]
-                    [InlineData(new int[] { 10, 1 }, 2)]
-                    [InlineData(new int[] { 10, 10, 1 }, 3)]
-                    internal void ストライクを取るとフレームは次に進む(int[] pins, int expectedFrameNo)
-                    {
-                        // Given
-                        // When
-                        var target = _initialState.Add(pins);
-
-                        // Then
-                        target.CurrentFrameNo.Should().Be(expectedFrameNo);
+                        target.FrameCount.Should().Be(expectedFrameNo);
 
                     }
 
                 }
 
 
-                public class 追加できるピンの合計数は10まで
+                public class _フレームに追加できるピンの合計数は10まで
                 {
                     private readonly Game _initialState = new Game();
 
@@ -178,7 +164,7 @@ namespace Bowling.MyVer.Test
                         var act = () => target.Add(10);
 
                         // Then
-                        act.Should().Throw<BowlingAppException>().WithMessage("The total number of pins that can be added in a frame is limited to 10.(frame=[[1]], hitPin=10)");
+                        act.Should().Throw<BowlingAppException>().WithMessage("The total number of pins that can be added in a frame is limited to 10.(frame=[NF=[1]], hitPin=10)");
                     }
 
                     [Fact]
@@ -190,7 +176,7 @@ namespace Bowling.MyVer.Test
                         var act = () => target.Add(2);
 
                         // Then
-                        act.Should().Throw<BowlingAppException>().WithMessage("The total number of pins that can be added in a frame is limited to 10.(frame=[[9]], hitPin=2)");
+                        act.Should().Throw<BowlingAppException>().WithMessage("The total number of pins that can be added in a frame is limited to 10.(frame=[NF=[9]], hitPin=2)");
                     }
                 }
 
@@ -204,19 +190,19 @@ namespace Bowling.MyVer.Test
                     private readonly Game _initialState = new Game();
 
                     [Fact]
-                    internal void 初期状態のフレームNoは1()
+                    internal void 初期状態のフレームNoは0()
                     {
                         // Given
                         // When
                         // Then
-                        _initialState.CurrentFrameNo.Should().Be(1);
+                        _initialState.FrameCount.Should().Be(0);
 
                     }
 
                     [Theory]
-                    [InlineData(new int[] { 10 }, 2)]
-                    [InlineData(new int[] { 10, 10 }, 3)]
-                    [InlineData(new int[] { 10, 10, 10 }, 4)]
+                    [InlineData(new int[] { 10 }, 1)]
+                    [InlineData(new int[] { 10, 10 }, 2)]
+                    [InlineData(new int[] { 10, 10, 10 }, 3)]
                     internal void ストライクを取るとフレームは次に進む(int[] pins, int expectedFrameNo)
                     {
                         // Given
@@ -224,34 +210,14 @@ namespace Bowling.MyVer.Test
                         var target = _initialState.Add(pins);
 
                         // Then
-                        target.CurrentFrameNo.Should().Be(expectedFrameNo);
+                        target.FrameCount.Should().Be(expectedFrameNo);
 
                     }
 
                 }
 
             }
-
-
-
-
         }
-
-
-
-        // TODO 今テストが書けないので後で
-        //namespace 倒したピンの数を追加できる
-        //{
-        //    public class ピンの数は0から10の範囲で追加する
-        //    {
-        //        [Fact]
-        //        public void _0を追加したら＿＿＿()
-        //        {
-        //            // かけない、、、
-        //        }
-        //    }
-        //}
-
     }
 
 
@@ -410,51 +376,45 @@ namespace Bowling.MyVer.Test
 
     namespace 最終フレームの得点を計算する
     {
-
-        public class ストライクを取るともう2回ピンを追加できる
+        public class ストライクは後の２回の投球のピンの数を合計する
         {
-            private readonly Game _initialState = new();
+            private static readonly NormalFrame _gutter = new NormalFrame(0, 0);
 
-            private readonly Frame _gutter = new Frame(0, 0);
+            // 9フレームまでgutter
+            private readonly Game _initialState = new(new Frames(_gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter));
+
 
             [Fact]
-            internal void ストライク後の投球なしの時は得点は0を返す()
+            internal void ストライク後に投球なしの場合はそのフレームの得点は0を返す()
             {
-
-                throw new NotImplementedException("ピンの追加問題を可決してから");
-
                 // Given
                 // When
-                var target = _initialState.Add(_gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter); // 9フレームまでgutter
-                target = target.Add(10);
+                var target = _initialState.Add(10);
 
                 // Then
                 target.TotalScore.Should().Be(0);
             }
 
-            //[Fact]
-            internal void ストライク後の投球が1回の時は得点は0を返す()
+            [Theory]
+            [InlineData(new int[] { 10, 10 }, 0, "Strike(TDB)")]
+            [InlineData(new int[] { 10, 1 }, 0, "Strike(TDB)")]
+            internal void ストライク後の投球が1回の時は得点は0を返す(int[] hitPins, int expectTotalScore, string because)
             {
+                // TODO
+
                 // Given
                 // When
-                var target = _initialState.Add(10).Add(1);
+                var target = _initialState.Add(hitPins);
 
                 // Then
-                target.TotalScore.Should().Be(0);
+                target.TotalScore.Should().Be(expectTotalScore, because);
             }
 
-            //[Theory]
-            [InlineData(new int[] { 10, 1, 2 }, 16, "Strike(10+1+2) + (1+2)")]
-            [InlineData(new int[] { 10, 0, 1 }, 12, "Strike(10+0+1) + (0+1)")]
-            [InlineData(new int[] { 10, 0, 0 }, 10, "Strike(10+0+0) + (0+0)")]
-            [InlineData(new int[] { 10, 10, 2 }, 22, "Strike(10+10+2) + Strike(TBD)")]
-            [InlineData(new int[] { 10, 10, 2, 3 }, 42, "Strike(10+10+2) + Strike(10+2+3) + (2+3)")]
-            [InlineData(new int[] { 10, 10, 10 }, 30, "Strike(10+10+2) + Strike(TBD) + Strike(TBD)")]
-            [InlineData(new int[] { 10, 10, 10, 3 }, 53, "Strike(10+10+10) + Strike(10+10+3) + Strike(TBD)")]
-            [InlineData(new int[] { 10, 10, 10, 3, 4 }, 77, "Strike(10+10+10) + Strike(10+10+3) + Strike(10+3+4) + (3+4)")]
-            [InlineData(new int[] { 10, 10, 10, 10 }, 60, "Strike(10+10+10) + Strike(10+10+10) + Strike(TDB)")]
-            [InlineData(new int[] { 10, 10, 10, 10, 4 }, 84, "Strike(10+10+10) + Strike(10+10+10) + Strike(10+10+4), Strike(TDB)")]
-            [InlineData(new int[] { 10, 10, 10, 10, 4, 5 }, 112, "Strike(10+10+10) + Strike(10+10+10) + Strike(10+10+4), Strike(10+4+5) + (4+5)")]
+            [Theory]
+            [InlineData(new int[] { 10, 1, 2 }, 13, "Strike(10+1+2)")]
+            [InlineData(new int[] { 10, 1, 10 }, 21, "Strike(10+1+10)")]
+            [InlineData(new int[] { 10, 10, 2 }, 22, "Strike(10+10+2)")]
+            [InlineData(new int[] { 10, 10, 10 }, 30, "Strike(10+10+10)")]
             internal void ストライクは後の2回の投球を加算する(int[] hitPins, int expectTotalScore, string because)
             {
                 // Given
@@ -464,12 +424,35 @@ namespace Bowling.MyVer.Test
                 // Then
                 target.TotalScore.Should().Be(expectTotalScore, because);
             }
+        }
+
+        public class スペアは後の１回の投球のピンの数を合計する
+        {
+            private static readonly NormalFrame _gutter = new NormalFrame(0, 0);
+
+            // 9フレームまでgutter
+            private readonly Game _initialState = new(new Frames(_gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter));
 
 
-            //[Theory]
-            [InlineData(new int[] { 10, 1, 9 }, 20, "Strike(10+1+9) + Spare(TBD)")]
-            [InlineData(new int[] { 10, 1, 9, 1 }, 31, "Strike(10+1+9) + Spare(1+9+1) + (TDB)")]
-            internal void ストライクの後がスペアでもストライクは後の2回の投球を加算する(int[] hitPins, int expectTotalScore, string because)
+            [Fact]
+            internal void スペア後に投球なしの場合はそのフレームの得点は0を返す()
+            {
+                // Given
+                // When
+                var target = _initialState.Add(1, 9);
+
+                // Then
+                target.TotalScore.Should().Be(0);
+            }
+
+            [Theory]
+            [InlineData(new int[] { 1, 9, 0 }, 10, "Spare(1+9+0)")]
+            [InlineData(new int[] { 1, 9, 1 }, 11, "Spare(1+9+1)")]
+            [InlineData(new int[] { 1, 9, 10 }, 20, "Spare(1+9+10)")]
+            [InlineData(new int[] { 0, 10, 0 }, 10, "Spare(0+10+0)")]
+            [InlineData(new int[] { 0, 10, 1 }, 11, "Spare(0+10+1)")]
+            [InlineData(new int[] { 0, 10, 10 }, 20, "Spare(0+10+10)")]
+            internal void スペア後の2回の投球を加算する(int[] hitPins, int expectTotalScore, string because)
             {
                 // Given
                 // When
@@ -478,10 +461,64 @@ namespace Bowling.MyVer.Test
                 // Then
                 target.TotalScore.Should().Be(expectTotalScore, because);
             }
-
-
         }
 
 
+        public class 上記以外は２回の投球のピンの数を合計する
+        {
+            private static readonly NormalFrame _gutter = new NormalFrame(0, 0);
+
+            // 9フレームまでgutter
+            private readonly Game _initialState = new(new Frames(_gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter, _gutter));
+
+            [Theory]
+            [InlineData(new[] { 0 }, 0, "(0+0)")]
+            [InlineData(new[] { 0, 0 }, 0, "(0+0)")]
+            [InlineData(new[] { 1, 8 }, 9, "(1+8)")]
+            internal void _２回の投球のピンの数を合計する(int[] hitPins, int expectTotalScore, string because)
+            {
+                // Given
+                // When
+                var target = _initialState.Add(hitPins);
+
+                // Then
+                target.TotalScore.Should().Be(expectTotalScore, because);
+
+            }
+
+            [Fact]
+            internal void ストライクでもスペアでもない場合は２回の投球で終了()
+            {
+                // Given
+                // When
+                var act = () => _initialState.Add(0, 0, 0);
+
+                // Then
+                act.Should().Throw<BowlingAppException>().WithMessage("Cannot add a frame. frames.Count=10");
+
+            }
+        }
     }
+
+
+    public class ゲーム終了時の得点を計算する
+    {
+        private readonly Game _initialState = new Game();
+
+        [Theory]
+        [InlineData(new[] { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 }, 300, "Parfect!")]
+        [InlineData(new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, "all gutter")]
+        [InlineData(new[] { 7, 3, 9, 0, 8, 1, 10, 5, 5, 3, 3, 10, 10, 5, 3, 4, 6, 9 }, 146, "sp(7+3+9) + (9+0) + (8+1) + st(10+5+5) + sp(5+5+3) + (3+3) + st(10+10+5) + st(10+5+3) + (5+3) + sp(4+6+9)")]
+        [InlineData(new[] { 1, 4, 4, 5, 6, 4, 5, 5, 10, 0, 1, 7, 3, 6, 4, 10, 2, 8, 6 }, 133, "(1+4) + (4+5) + sp(6+4+5) + sp(5+5+10) + st(10+0+1) + sp(7+3+6) + sp(6+4+10) + st(10+2+8) + sp(2+8+6)")]
+        internal void _10フレームすべての得点を計算する(int[] hitPins, int expectTotalScore, string because)
+        {
+            // Given
+            // When
+            var target = _initialState.Add(hitPins);
+
+            // Then
+            target.TotalScore.Should().Be(expectTotalScore, because);
+        }
+    }
+
 }

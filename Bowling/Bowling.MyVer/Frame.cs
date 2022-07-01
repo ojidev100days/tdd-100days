@@ -1,17 +1,19 @@
 ﻿namespace Bowling.MyVer
 {
-    internal class Frame
+    internal class NormalFrame : IFrame
     {
+
+        public static readonly NormalFrame Empty = new();
+
         private readonly int[] _pins;
 
-        public Frame(params int[] pins)
+        public NormalFrame(params int[] pins)
         {
-
             // TODO pins の Length は 0 ～ 3 のチェックが必要
             this._pins = pins;
         }
 
-        internal bool CanBeAdded
+        public bool CanBeAddPin
         {
             get
             {
@@ -36,9 +38,9 @@
         public IEnumerable<int> HitPins => _pins;
 
 
-        internal Frame Add(int hitPin)
+        public IFrame Add(int hitPin)
         {
-            if (!CanBeAdded) throw new BowlingAppException($"Cannot be added. frame={this}, hitPin={hitPin}");
+            if (!CanBeAddPin) throw new BowlingAppException($"Cannot be added. frame={this}, hitPin={hitPin}");
 
             if (10 < _pins.Sum(x => x) + hitPin)
             {
@@ -48,12 +50,12 @@
             var newPins = new int[_pins.Length + 1];
             _pins.CopyTo(newPins, 0);
             newPins[_pins.Length] = hitPin;
-            return new Frame(newPins);
+            return new NormalFrame(newPins);
         }
 
         public override string ToString()
         {
-            return "[" + string.Join(",", _pins) + "]";
+            return "NF=[" + string.Join(",", _pins) + "]";
         }
     }
 }
