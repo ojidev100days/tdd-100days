@@ -25,7 +25,15 @@ namespace Bowling.MyVer2
 
         internal Game ThrowBall(params int[] hitPins)
         {
+            // TODO: 不正な値をはじきたい（1フレームに11pin以上はいる、とか）
             return new Game(hitPins);
+        }
+
+
+        public override string ToString()
+        {
+            var frames = new FrameEnumerable(_hitPins);
+            return String.Join("|", frames);
         }
     }
 }

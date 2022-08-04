@@ -15,5 +15,11 @@
             this._i = i;
         }
 
+        public override string ToString()
+        {
+            // TODO: 10フレーム目は3つ出したい
+            return $"[{_hitPins[_i]}]";
+        }
+
     }
 }

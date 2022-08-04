@@ -3,6 +3,9 @@
     "WSL": {
       "commandName": "WSL2",
       "distributionName": ""
+    },
+    "Bowling.MyVer2": {
+      "commandName": "Project"
     }
   }
 }

@@ -16,5 +16,10 @@ namespace Bowling.MyVer2
             this._hitPinsInFrame = hitPinsInFrame;
         }
 
+
+        public override string ToString()
+        {
+            return $"[{_hitPinsInFrame[0]},{_hitPinsInFrame[1]}]";
+        }
     }
 }
