@@ -16,7 +16,7 @@ namespace Bowling.MyVer2.Test
                 // Given
                 // When
                 // Then
-                _target.GetScore().Should().Be(0);
+                _target.Score.Should().Be(0);
             }
 
             [Theory]
@@ -28,7 +28,7 @@ namespace Bowling.MyVer2.Test
                 var target = _target.ThrowBall(throwBalls);
                 // When
                 // Then
-                target.GetScore().Should().Be(expect, becase);
+                target.Score.Should().Be(expect, becase);
             }
 
             [Theory]
@@ -40,7 +40,7 @@ namespace Bowling.MyVer2.Test
                 var target = _target.ThrowBall(throwBalls);
                 // When
                 // Then
-                target.GetScore().Should().Be(expect, becase);
+                target.Score.Should().Be(expect, becase);
             }
         }
 
@@ -58,8 +58,30 @@ namespace Bowling.MyVer2.Test
                 var target = _target.ThrowBall(throwBalls);
                 // When
                 // Then
-                target.GetScore().Should().Be(expect, becase);
+                target.Score.Should().Be(expect, becase);
             }
         }
+
+
+        public class ゲーム終了時の得点を計算する
+        {
+            private readonly Game _target = new Game();
+
+            [Theory]
+            [InlineData(new[] { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 }, 300, "Parfect!")]
+            [InlineData(new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 0, "all gutter")]
+            [InlineData(new[] { 7, 3, 9, 0, 8, 1, 10, 5, 5, 3, 3, 10, 10, 5, 3, 4, 6, 9 }, 146, "sp(7+3+9) + (9+0) + (8+1) + st(10+5+5) + sp(5+5+3) + (3+3) + st(10+10+5) + st(10+5+3) + (5+3) + sp(4+6+9)")]
+            [InlineData(new[] { 1, 4, 4, 5, 6, 4, 5, 5, 10, 0, 1, 7, 3, 6, 4, 10, 2, 8, 6 }, 133, "(1+4) + (4+5) + sp(6+4+5) + sp(5+5+10) + st(10+0+1) + sp(7+3+6) + sp(6+4+10) + st(10+2+8) + sp(2+8+6)")]
+            internal void _10フレームすべての得点を計算する(int[] hitPins, int expectTotalScore, string because)
+            {
+                // Given
+                // When
+                var target = _target.ThrowBall(hitPins);
+
+                // Then
+                target.Score.Should().Be(expectTotalScore, because);
+            }
+        }
+
     }
 }

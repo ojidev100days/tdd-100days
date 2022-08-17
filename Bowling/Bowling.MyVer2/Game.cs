@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace Bowling.MyVer2
 {
-    internal class Game
+    internal class Game : IEnumerable<IFrame>
     {
         private int[] _hitPins = new int[0];
+
+        internal int Score => this.Where(x => x.IsComplete).Select(x => x.Score).Sum();
 
         public Game() { }
 
@@ -16,12 +19,7 @@ namespace Bowling.MyVer2
         {
             this._hitPins = hitPins;
         }
-
-        internal int GetScore()
-        {
-            var frames = new FrameEnumerable(_hitPins);
-            return frames.Where(x => x.IsComplete).Select(x => x.Score).Sum();
-        }
+                
 
         internal Game ThrowBall(params int[] hitPins)
         {
@@ -30,10 +28,19 @@ namespace Bowling.MyVer2
         }
 
 
+        public IEnumerator<IFrame> GetEnumerator()
+        {
+            return new FrameEnumerable(_hitPins).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
         public override string ToString()
         {
-            var frames = new FrameEnumerable(_hitPins);
-            return String.Join("|", frames);
+            return string.Join("|", this);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Bowling.MyVer2
 
         public IEnumerator<IFrame> GetEnumerator()
         {
-            int frameCount = 0;// 10フレーム目を判定するために使用する
+            int frameCount = 1;// 10フレーム目を判定するために使用する
             List<int> pinsInFrame = new List<int>();
 
             for (int i = 0; i < hitPins.Length; i++)
@@ -28,7 +28,7 @@ namespace Bowling.MyVer2
                     if (currentHitPin == 10)
                     {
                         // Strike
-                        IFrame frame = new StrikeFrame(hitPins, i);
+                        IFrame frame = CreateFrame(frameCount, () => new StrikeFrame(hitPins, i));
                         yield return frame;
 
                         frameCount++;
@@ -42,12 +42,12 @@ namespace Bowling.MyVer2
                     if (hitPinsInFrame == 10)
                     {
                         // Spare
-                        yield return new SpareFrame(pinsInFrame.ToList().AsReadOnly(), hitPins, i);
+                        yield return CreateFrame(frameCount, () => new SpareFrame(pinsInFrame.ToList().AsReadOnly(), hitPins, i));
                     }
                     else
                     {
                         // Strike
-                        yield return new NormalFrame(pinsInFrame.ToList().AsReadOnly());
+                        yield return CreateFrame(frameCount, () => new NormalFrame(pinsInFrame.ToList().AsReadOnly()));
                     }
                     frameCount++;
                     pinsInFrame.Clear();
@@ -60,6 +60,13 @@ namespace Bowling.MyVer2
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        IFrame CreateFrame(int frameCount, Func<IFrame> createFrameFunc)
+        {
+            return frameCount == 10
+                ? new LastFrame(createFrameFunc.Invoke())
+                : createFrameFunc.Invoke();
         }
     }
 }

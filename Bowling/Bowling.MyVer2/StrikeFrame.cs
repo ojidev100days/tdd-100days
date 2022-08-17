@@ -2,12 +2,16 @@
 {
     internal class StrikeFrame : IFrame
     {
-        private readonly int[] _hitPins;
+        private readonly IReadOnlyList<int> _hitPins;
         private readonly int _i;
 
-        public bool IsComplete => _i + 2 < _hitPins.Length;
+        public bool IsComplete => _i + 2 < _hitPins.Count;
 
-        public int Score => IsComplete ? _hitPins[_i] + _hitPins[_i + 1] + _hitPins[_i + 2] : 0;
+        public int Score => IsComplete ? ScorePins.Sum() : 0;
+
+        public int[] KnockedDownPins => new int[] { _hitPins[_i] };
+
+        public int[] ScorePins => _hitPins.Skip(_i).Take(3).ToArray();
 
         public StrikeFrame(int[] hitPins, int i)
         {
@@ -17,7 +21,6 @@
 
         public override string ToString()
         {
-            // TODO: 10フレーム目は3つ出したい
             return $"[{_hitPins[_i]}]";
         }
 

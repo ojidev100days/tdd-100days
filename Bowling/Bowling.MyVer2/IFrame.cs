@@ -5,5 +5,10 @@
         bool IsComplete { get; }
 
         int Score { get; }
+
+        int[] KnockedDownPins { get; }
+
+        int[] ScorePins { get; }
+
     }
 }
