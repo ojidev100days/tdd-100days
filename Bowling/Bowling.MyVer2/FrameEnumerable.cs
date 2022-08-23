@@ -4,6 +4,9 @@ namespace Bowling.MyVer2
 {
     internal class FrameEnumerable : IEnumerable<IFrame>
     {
+        private const int MAX_FRAME_COUNT = 10;
+
+
         private int[] hitPins;
 
         public FrameEnumerable(int[] hitPins)
@@ -18,7 +21,9 @@ namespace Bowling.MyVer2
 
             for (int i = 0; i < hitPins.Length; i++)
             {
+
                 var currentHitPin = hitPins[i];
+                if (currentHitPin < 0 || 10 < currentHitPin) throw new BowlingAppException($"The number of pins that can be added at one time is 0-10.(i={i}, hitPin={currentHitPin})");
 
                 // 現在倒したPinを保存
                 pinsInFrame.Add(currentHitPin);
@@ -46,13 +51,22 @@ namespace Bowling.MyVer2
                     }
                     else
                     {
-                        // Strike
+                        // Normal
                         yield return CreateFrame(frameCount, () => new NormalFrame(pinsInFrame.ToList().AsReadOnly()));
                     }
                     frameCount++;
                     pinsInFrame.Clear();
                 }
 
+                // フレーム数が10を超えた時点で、処理を打ち切り
+                if (MAX_FRAME_COUNT < frameCount) yield break;
+            }
+
+
+            if (pinsInFrame.Any())
+            {
+                // Normal
+                yield return CreateFrame(frameCount, () => new NormalFrame(pinsInFrame.ToList().AsReadOnly()));
             }
 
         }
@@ -64,7 +78,7 @@ namespace Bowling.MyVer2
 
         IFrame CreateFrame(int frameCount, Func<IFrame> createFrameFunc)
         {
-            return frameCount == 10
+            return frameCount == MAX_FRAME_COUNT
                 ? new LastFrame(createFrameFunc.Invoke())
                 : createFrameFunc.Invoke();
         }

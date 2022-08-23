@@ -3,6 +3,155 @@
 namespace Bowling.MyVer2.Test
 {
 
+
+    namespace 倒したピンを追加する
+    {
+
+        public class _1回で追加できるピンの数は0から10
+        {
+            private readonly Game _initialGame = new Game();
+
+            [Fact]
+            internal void マイナス値を追加すると例外発生()
+            {
+                // Given
+                // When
+                var act = () => _initialGame.ThrowBall(-1);
+
+                // Then
+                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(i=0, hitPin=-1)");
+            }
+
+            [Theory]
+            [InlineData(0)]
+            [InlineData(10)]
+            internal void _0から10の値を追加すると正常終了(int pin)
+            {
+                // Given
+                // When
+                var act = () => _initialGame.ThrowBall(pin);
+
+                // Then
+                act.Should().NotThrow();
+            }
+
+            [Fact]
+            internal void _11以上の値を追加すると例外発生()
+            {
+                // Given
+                // When
+                var act = () => _initialGame.ThrowBall(11);
+
+                // Then
+                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(i=0, hitPin=11)");
+            }
+        }
+    }
+
+
+    namespace フレーム
+    {
+        public static class TestData
+        {
+            public static int[][] NineFrames => Enumerable.Range(0, 9).Select(x => new[] { 1, 0 }).ToArray();
+
+        }
+        public class フレームには２回分の投球を含めることができる
+        {
+            private readonly Game _initialGame = new();
+
+            [Fact]
+            internal void 初期状態のフレームの数は0()
+            {
+                // Given
+                // When
+                // Then
+                _initialGame.Frames.Should().BeEmpty();
+
+            }
+
+            [Theory]
+            [InlineData(new int[] { 1 }, 1, "ストライク、スペア以外")]
+            [InlineData(new int[] { 1, 2 }, 1, "ストライク、スペア以外")]
+            [InlineData(new int[] { 1, 2, 3 }, 2, "ストライク、スペア以外")]
+            [InlineData(new int[] { 1, 2, 3, 4 }, 2, "ストライク、スペア以外")]
+            [InlineData(new int[] { 1, 2, 3, 4, 5 }, 3, "ストライク、スペア以外")]
+            [InlineData(new int[] { 10 }, 1, "ストライク")]
+            [InlineData(new int[] { 10, 10 }, 2, "ストライク")]
+            [InlineData(new int[] { 10, 10, 10 }, 3, "ストライク")]
+            [InlineData(new int[] { 1, 9 }, 1, "スペア")]
+            [InlineData(new int[] { 1, 9, 1 }, 2, "スペア")]
+            [InlineData(new int[] { 1, 9, 1, 9 }, 2, "スペア")]
+            [InlineData(new int[] { 1, 9, 2, 8, 3 }, 3, "スペア")]
+            internal void ピンを2回倒すごとにフレームが進む(int[] pins, int expectedFrameCount, string because)
+            {
+                // Given
+                // When
+                var target = _initialGame.ThrowBall(pins);
+
+                // Then
+                target.Frames.Count.Should().Be(expectedFrameCount, because);
+
+            }
+
+
+
+            [Theory]
+            [InlineData(new int[] { 1, 10 })]
+            [InlineData(new int[] { 2, 9 })]
+            internal void フレームに追加できるピンの合計数は10まで(int[] pins)
+            {
+                // Given
+                // When
+                var act = () => _initialGame.ThrowBall(pins);
+
+                // Then
+                act.Should().Throw<BowlingAppException>().WithMessage($"The total number of pins that can be added in a frame is limited to 10.(hitPinsInFrame=[*])");
+            }
+
+
+
+            [Theory]
+            [InlineData(new int[] { 1, 0 }, "ストライク、スペア以外")]
+            [InlineData(new int[] { 10, 10, 10 }, "ストライク")]
+            [InlineData(new int[] { 1, 9, 1 }, "スペア")]
+            internal void すべての投球が終わった場合のフレーム数は10(int[] lastFramePins, string because)
+            {
+                // Given
+                // 10フレーム分の投球内容
+                var throwBalls = TestData.NineFrames.Concat(new int[][] { lastFramePins }).SelectMany(x => x).ToArray();
+
+                // When
+                var target = _initialGame.ThrowBall(throwBalls);
+
+                // Then
+                target.Frames.Count.Should().Be(10, because);
+
+            }
+
+
+            [Theory]
+            [InlineData(new int[] { 1, 0 }, "ストライク、スペア以外")]
+            [InlineData(new int[] { 10, 10, 10 }, "ストライク")]
+            [InlineData(new int[] { 1, 9, 1 }, "スペア")]
+            internal void _10フレーム完了後は投球できない(int[] lastFramePins, string because)
+            {
+                // Given
+                // 10フレーム分の投球内容
+                var throwBalls = TestData.NineFrames.Concat(new int[][] { lastFramePins }).SelectMany(x => x).ToArray();
+                var target = _initialGame.ThrowBall(throwBalls);
+
+                // When
+                var act = () => target.ThrowBall(1);
+
+                // Then
+                act.Should().Throw<BowlingAppException>(because).WithMessage("The game is already over.");
+
+            }
+        }
+
+    }
+
     namespace 得点を計算する
     {
 
@@ -45,14 +194,37 @@ namespace Bowling.MyVer2.Test
         }
 
 
-        public class ストライクの場合は後の２回の投球で倒したピンの数をストライクの得点に加算する
+        public class ストライクの場合は後の2回の投球で倒したピンの数をストライクの得点に加算する
         {
             private readonly Game _target = new();
 
             [Theory]
-            //[InlineData(new[] { 10 }, 0, "(TBD)")]
+            [InlineData(new[] { 10 }, 0, "(TBD)")]
             [InlineData(new[] { 10, 1 }, 0, "(TBD)")]
-            public void ストライク後の２回の投球がない場合は得点を計算しない(int[] throwBalls, int expect, string becase)
+            [InlineData(new[] { 10, 1, 2 }, 16, "(10+1+2)+(1+2)")]
+            [InlineData(new[] { 10, 10, 2 }, 22, "(10+10+2)+(TDB)")]
+            [InlineData(new[] { 10, 10, 10 }, 30, "(10+10+10)+(TDB)+(TDB)")]
+            public void フレームで倒したピンを合計する(int[] throwBalls, int expect, string becase)
+            {
+                // Given
+                var target = _target.ThrowBall(throwBalls);
+                // When
+                // Then
+                target.Score.Should().Be(expect, becase);
+            }
+        }
+
+        public class スペアの場合は後の1回の投球で倒したピンの数をスペアの得点に加算する
+        {
+            private readonly Game _target = new();
+
+            [Theory]
+            [InlineData(new[] { 1, 9 }, 0, "(TBD)")]
+            [InlineData(new[] { 1, 9, 2 }, 12, "(1+9+2)+(TDB)")]
+            [InlineData(new[] { 1, 9, 2, 7 }, 21, "(1+9+2)+(2+7)")]
+            [InlineData(new[] { 1, 9, 2, 8 }, 12, "(1+9+2)+(TDB)")]
+            [InlineData(new[] { 1, 9, 2, 8, 3 }, 25, "(1+9+2)+(2+8+3)+(TDB)")]
+            public void フレームで倒したピンを合計する(int[] throwBalls, int expect, string becase)
             {
                 // Given
                 var target = _target.ThrowBall(throwBalls);

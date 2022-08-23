@@ -6,7 +6,7 @@ namespace Bowling.MyVer2
     {
         private IFrame _innerFrame;
 
-        public bool IsComplete => true;
+        public bool IsComplete => _innerFrame.IsComplete;
 
         public int Score => _innerFrame.Score;
 

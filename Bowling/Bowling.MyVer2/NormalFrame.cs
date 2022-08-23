@@ -4,10 +4,10 @@ namespace Bowling.MyVer2
 {
     internal class NormalFrame : IFrame
     {
-        private IReadOnlyList<int> _hitPinsInFrame;
+        private readonly IReadOnlyList<int> _hitPinsInFrame;
 
 
-        public bool IsComplete => true;
+        public bool IsComplete => _hitPinsInFrame.Count == 2;
 
         public int Score => ScorePins.Sum();
 
@@ -17,6 +17,7 @@ namespace Bowling.MyVer2
 
         public NormalFrame(IReadOnlyList<int> hitPinsInFrame)
         {
+            if (10 <= hitPinsInFrame.Sum()) throw new BowlingAppException($"The total number of pins that can be added in a frame is limited to 10.(hitPinsInFrame={hitPinsInFrame.ToMsg()})");
             this._hitPinsInFrame = hitPinsInFrame;
         }
 
@@ -25,5 +26,6 @@ namespace Bowling.MyVer2
         {
             return $"[{_hitPinsInFrame[0]},{_hitPinsInFrame[1]}]";
         }
+
     }
 }

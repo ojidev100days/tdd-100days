@@ -7,40 +7,36 @@ using System.Threading.Tasks;
 
 namespace Bowling.MyVer2
 {
-    internal class Game : IEnumerable<IFrame>
+    internal class Game
     {
-        private int[] _hitPins = new int[0];
+        private readonly int[] _hitPins;
 
-        internal int Score => this.Where(x => x.IsComplete).Select(x => x.Score).Sum();
+        internal IReadOnlyList<IFrame> Frames { get; }
 
-        public Game() { }
+        internal int Score => Frames.TakeWhile(x => x.IsComplete).Sum(x => x.Score);
+
+        public Game() {
+            _hitPins = new int[0];
+            Frames = new List<IFrame>();
+        }
 
         public Game(params int[] hitPins)
         {
             this._hitPins = hitPins;
+            this.Frames = new FrameEnumerable(_hitPins).ToList();
         }
                 
 
         internal Game ThrowBall(params int[] hitPins)
         {
-            // TODO: 不正な値をはじきたい（1フレームに11pin以上はいる、とか）
-            return new Game(hitPins);
+            if (Frames.LastOrDefault() is LastFrame lastFrame && lastFrame.IsComplete) throw new BowlingAppException("The game is already over.");
+            return new Game(_hitPins.Concat(hitPins).ToArray());
         }
 
-
-        public IEnumerator<IFrame> GetEnumerator()
-        {
-            return new FrameEnumerable(_hitPins).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
 
         public override string ToString()
         {
-            return string.Join("|", this);
+            return string.Join("|", Frames);
         }
     }
 }
