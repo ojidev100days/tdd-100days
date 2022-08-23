@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using static Bowling.MyVer2.HitPin;
 
 namespace Bowling.MyVer2
 {
@@ -10,15 +11,14 @@ namespace Bowling.MyVer2
 
         public int Score => _innerFrame.Score;
 
-        public int[] KnockedDownPins => _innerFrame.ScorePins;
+        public HitPins KnockedDownPins => _innerFrame.ScorePins;
 
-        public int[] ScorePins => _innerFrame.ScorePins;
+        public HitPins ScorePins => _innerFrame.ScorePins;
 
         public LastFrame(IFrame innerFrame)
         {
             _innerFrame = innerFrame;
         }
-
 
         public override string ToString()
         {

@@ -19,7 +19,7 @@ namespace Bowling.MyVer2.Test
                 var act = () => _initialGame.ThrowBall(-1);
 
                 // Then
-                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(i=0, hitPin=-1)");
+                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(pin=-1)");
             }
 
             [Theory]
@@ -43,7 +43,7 @@ namespace Bowling.MyVer2.Test
                 var act = () => _initialGame.ThrowBall(11);
 
                 // Then
-                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(i=0, hitPin=11)");
+                act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(pin=11)");
             }
         }
     }

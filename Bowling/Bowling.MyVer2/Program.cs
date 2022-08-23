@@ -19,7 +19,7 @@ void ShowGame(string gameName, Game game) {
     Console.WriteLine("Game1");
     Console.WriteLine($"Game       : {game}");
     Console.WriteLine($"FrameScore : {string.Join(",", game.Frames.Select(s => s.Score))}");
-    Console.WriteLine($"ScorePins  : {string.Join(",", game.Frames.Select(s => s.ScorePins.ToMsg()))}");
+    Console.WriteLine($"ScorePins  : {string.Join(",", game.Frames.Select(s => s.ScorePins))}");
     Console.WriteLine($"Score      : {game.Score}");
     var last = game.Frames.Last();
     Console.WriteLine($"Last Type            : {last.GetType()}");

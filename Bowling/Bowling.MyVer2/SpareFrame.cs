@@ -1,24 +1,25 @@
 ﻿using System.Collections.ObjectModel;
+using static Bowling.MyVer2.HitPin;
 
 namespace Bowling.MyVer2
 {
     internal class SpareFrame : IFrame
     {
-        private readonly int[] _hitPins;
+        private readonly HitPins _hitPins;
         private readonly int _i;
-        private readonly IReadOnlyList<int> _hitPinsInFrame;
+        private readonly HitPins _hitPinsInFrame;
 
-        public bool IsComplete => (_i + 1) < _hitPins.Length;
+        public bool IsComplete => (_i + 1) < _hitPins.Count;
 
         // スペア後の投球があれば「フレーム内のピン＋後の投球」がをスコアとする
         // スペア後の投球がなければ、スコアは0（未確定）
         public int Score => IsComplete ? ScorePins.Sum() : 0;
 
-        public int[] KnockedDownPins => _hitPins.Skip(_i - 1).Take(2).ToArray();
+        public HitPins KnockedDownPins => _hitPins.Range(_i - 1, 2);
 
-        public int[] ScorePins => _hitPins.Skip(_i - 1).Take(3).ToArray();
+        public HitPins ScorePins => _hitPins.Range(_i - 1, 3);
 
-        public SpareFrame(IReadOnlyList<int> hitPinsInFrame, int[] hitPins, int i)
+        public SpareFrame(HitPins hitPinsInFrame, HitPins hitPins, int i)
         {
             this._hitPinsInFrame = hitPinsInFrame;
             this._hitPins = hitPins;

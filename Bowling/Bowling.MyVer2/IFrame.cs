@@ -1,4 +1,6 @@
-﻿namespace Bowling.MyVer2
+﻿using static Bowling.MyVer2.HitPin;
+
+namespace Bowling.MyVer2
 {
     internal interface IFrame
     {
@@ -6,9 +8,9 @@
 
         int Score { get; }
 
-        int[] KnockedDownPins { get; }
+        HitPins KnockedDownPins { get; }
 
-        int[] ScorePins { get; }
+        HitPins ScorePins { get; }
 
     }
 }
