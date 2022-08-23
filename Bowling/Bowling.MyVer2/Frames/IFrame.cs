@@ -1,6 +1,6 @@
 ﻿using static Bowling.MyVer2.HitPin;
 
-namespace Bowling.MyVer2
+namespace Bowling.MyVer2.Frames
 {
     internal interface IFrame
     {

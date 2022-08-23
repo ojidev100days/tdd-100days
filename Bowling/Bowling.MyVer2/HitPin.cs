@@ -1,21 +1,23 @@
 ﻿using System.Collections;
+using Bowling.MyVer2.Frames;
+using Bowling.MyVer2.Utils;
 
 namespace Bowling.MyVer2
 {
     public struct HitPin
     {
-        public static readonly int MAX_HIT_PIN = 10;
+        public static readonly int MinHitPin = 0;
+        public static readonly int MaxHitPin = 10;
 
         public static implicit operator HitPin(int hitPin) => new(hitPin);
 
-
         public readonly int _pin;
 
-        public bool IsStrike => _pin == 10;
+        public bool IsStrike => _pin == MaxHitPin;
 
         public HitPin(int pin)
         {
-            if (pin < 0 || 10 < pin) throw new BowlingAppException($"The number of pins that can be added at one time is 0-10.(pin={pin})");
+            if (pin < MinHitPin || MaxHitPin < pin) throw new BowlingAppException($"The number of pins that can be added at one time is 0-10.(pin={pin})");
             _pin = pin;
         }
 
@@ -24,32 +26,33 @@ namespace Bowling.MyVer2
             return _pin.ToString();
         }
 
-
-
         public struct HitPins : IEnumerable<HitPin>
         {
+            public static HitPins Of(params int[] hitPins)
+            {
+                return new HitPins(hitPins.Select(x => (HitPin)x).ToArray());
+            }
 
             private readonly IReadOnlyList<HitPin> _hitPins;
 
-            internal HitPins Add(HitPin currentHitPin)
-            {
-                return new HitPins(_hitPins.Concat(new HitPin[] { currentHitPin }));
-            }
+            public int ThrowCount => _hitPins.Count;
 
-            public int Count => _hitPins.Count;
+            public bool IsSpare => ThrowCount == SpareFrame.MaxThrowCount && Sum() == MaxHitPin;
 
-            public bool IsSpare => Count == 2 && Sum() == MAX_HIT_PIN;
+            public bool IsStrike => ThrowCount == StrikeFrame.MaxThrowCount && Sum() == MaxHitPin;
 
-            public bool IsStrike => Count == 1 && Sum() == MAX_HIT_PIN;
-
-            public bool IsComplete => IsStrike || IsSpare || Count == 2;
+            public bool IsComplete => IsStrike || IsSpare || ThrowCount == NormalFrame.MaxThrowCount;
 
             public HitPin this[int i] => _hitPins[i];
 
-
             public HitPins()
             {
-                _hitPins = new HitPin[] { };
+                _hitPins = Array.Empty<HitPin>();
+            }
+
+            public HitPins(params HitPin[] hitPins)
+            {
+                _hitPins = hitPins;
             }
 
             public HitPins(IReadOnlyList<HitPin> hitPins)
@@ -65,6 +68,16 @@ namespace Bowling.MyVer2
                 return _hitPins.Sum(x => x._pin);
             }
 
+            internal HitPins Add(HitPin hitPin)
+            {
+                return Concat(new HitPins(hitPin));
+            }
+
+            internal HitPins Concat(HitPins concatHitPins)
+            {
+                return new HitPins(_hitPins.Concat(concatHitPins));
+            }
+
             public IEnumerator<HitPin> GetEnumerator()
             {
                 return _hitPins.GetEnumerator();
@@ -75,14 +88,14 @@ namespace Bowling.MyVer2
                 return GetEnumerator();
             }
 
-            public override string ToString()
-            {
-                return _hitPins.ToMsg();
-            }
-
             internal HitPins Range(int start, int count)
             {
                 return new HitPins(_hitPins.Skip(start).Take(count).ToArray());
+            }
+
+            public override string ToString()
+            {
+                return _hitPins.ToStr();
             }
         }
     }

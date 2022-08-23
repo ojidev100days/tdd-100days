@@ -6,12 +6,10 @@ using Bowling.MyVer2;
 // See https://aka.ms/new-console-template for more information
 Console.WriteLine("Bowling App 2");
 
-
-ShowGame("Game1", new Game(0, 1, 2, 3, 4, 5, 5, 5, 10, 5, 5, 4, 3, 2, 1, 0, 10, 8, 1));
-ShowGame("Game2", new Game(0, 1, 2, 3, 4, 5, 5, 5, 10, 5, 5, 4, 3, 2, 1, 0, 10, 10, 9, 8));
-ShowGame("Game3", new Game(0, 1, 2, 3, 4, 5, 5, 5, 10, 5, 5, 4, 3, 2, 1, 0, 10, 9, 1, 8));
-ShowGame("Game4", new Game(1, 9, 2, 8, 3));
-
+ShowGame("Game1", Game.Of(0, 1, 2, 3, 4, 5, 5, 5, 10, 5, 5, 4, 3, 2, 1, 0, 10, 8, 1));
+ShowGame("Game2", Game.Of(0, 1, 2, 3, 4, 5, 5, 5, 10, 5, 5, 4, 3, 2, 1, 0, 10, 10, 9, 8));
+ShowGame("Game3", Game.Of(0, 1, 2, 3, 4, 5, 5, 5, 10, 5, 5, 4, 3, 2, 1, 0, 10, 9, 1, 8));
+ShowGame("Game4", Game.Of(1, 9, 2, 8, 3));
 
 void ShowGame(string gameName, Game game) {
     Console.WriteLine("--------------------------------");

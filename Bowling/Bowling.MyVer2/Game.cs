@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Bowling.MyVer2.Frames;
+using static Bowling.MyVer2.HitPin;
 
 namespace Bowling.MyVer2
 {
     internal class Game
     {
-        private readonly HitPin[] _hitPins;
+        public static Game Of(params int[] hitPins)
+        {
+            return new Game(HitPins.Of(hitPins));
+        }
+
+        private readonly HitPins _hitPins;
 
         internal IReadOnlyList<IFrame> Frames { get; }
 
@@ -17,27 +18,26 @@ namespace Bowling.MyVer2
 
         public bool IsComplete => Frames.LastOrDefault() is LastFrame lastFrame && lastFrame.IsComplete;
 
-        public Game() {
-            _hitPins = new HitPin[] { };
+        public Game()
+        {
+            _hitPins = new HitPins();
             Frames = new List<IFrame>();
         }
 
-        public Game(params HitPin[] hitPins)
+        public Game(HitPins hitPins)
         {
             this._hitPins = hitPins;
             this.Frames = new FrameEnumerable(_hitPins).ToList();
         }
-                
 
-        internal Game ThrowBall(params HitPin[] hitPins)
+        internal Game ThrowBall(HitPins hitPins)
         {
-            //if (Frames.LastOrDefault() is LastFrame lastFrame && lastFrame.IsComplete) throw new BowlingAppException("The game is already over.");
-            return new Game(_hitPins.Concat(hitPins).ToArray());
+            return new Game(_hitPins.Concat(hitPins));
         }
 
-        internal Game ThrowBall(params int[] hitPins) 
+        internal Game ThrowBall(params int[] hitPins)
         {
-            return ThrowBall(hitPins.Select(x => new HitPin(x)).ToArray());
+            return ThrowBall(HitPins.Of(hitPins));
         }
 
         public override string ToString()
