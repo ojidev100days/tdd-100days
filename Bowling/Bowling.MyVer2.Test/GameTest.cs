@@ -4,7 +4,7 @@ namespace Bowling.MyVer2.Test
 {
 
 
-    namespace 倒したピンを追加する
+    namespace 投球する
     {
 
         public class _1回で追加できるピンの数は0から10
@@ -46,18 +46,95 @@ namespace Bowling.MyVer2.Test
                 act.Should().Throw<BowlingAppException>().WithMessage("The number of pins that can be added at one time is 0-10.(pin=11)");
             }
         }
+
+        public class ゲーム終了後は投球できない
+        {
+            private readonly Game _initialGame = new();
+
+            private static readonly int[][] _nineFrames = Enumerable.Range(0, 9).Select(x => new[] { 1, 0 }).ToArray();
+
+            [Theory]
+            [InlineData(new int[] { 0, 9 }, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 9, 2 }, "スペア")]
+            [InlineData(new int[] { 10, 10, 10 }, "ストライク")]
+            internal void _10フレーム完了まで投球できる(int[] lastFramePins, string because)
+            {
+                // Given
+                // 10フレーム分の投球内容
+                var throwBalls = _nineFrames.Concat(new int[][] { lastFramePins }).SelectMany(x => x).ToArray();
+                // When
+                var act = () => _initialGame.ThrowBall(throwBalls);
+
+                // Then
+                act.Should().NotThrow<BowlingAppException>(because);
+
+            }
+
+            [Theory]
+            [InlineData(new int[] { 1, 0 }, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 9, 1 }, "スペア")]
+            [InlineData(new int[] { 10, 10, 10 }, "ストライク")]
+            internal void _10フレーム完了後は投球できない(int[] lastFramePins, string because)
+            {
+                // Given
+                // 10フレーム分の投球内容
+                var throwBalls = _nineFrames.Concat(new int[][] { lastFramePins }).SelectMany(x => x).ToArray();
+                var target = _initialGame.ThrowBall(throwBalls);
+
+                // When
+                var act = () => target.ThrowBall(1);
+
+                // Then
+                act.Should().Throw<BowlingAppException>(because).WithMessage("The game is already over. (hitPins=*, currentIndex=*)");
+
+            }
+
+
+            [Theory]
+            [InlineData(new int[] { 2, 7, 3 }, "スペア,ストライク、以外")]
+            [InlineData(new int[] { 2, 8, 3, 4 }, "スペア")]
+            [InlineData(new int[] { 10, 10, 10, 10 }, "ストライク")]
+            internal void _10フレームを超える投球は受け付けない(int[] lastFramePins, string because)
+            {
+                // Given
+                // 10フレーム分の投球内容
+                var throwBalls = _nineFrames.Concat(new int[][] { lastFramePins }).SelectMany(x => x).ToArray();
+
+                // When
+                var act = () => _initialGame.ThrowBall(throwBalls); ;
+
+                // Then
+                act.Should().Throw<BowlingAppException>(because).WithMessage("The game is already over. (hitPins=*, currentIndex=*)");
+
+            }
+
+            [Theory]
+            [InlineData(new int[] { 1, 0 }, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 9, 1 }, "スペア")]
+            [InlineData(new int[] { 10, 10, 10 }, "ストライク")]
+            internal void すべての投球が終わった場合ゲームは完了済みとなる(int[] lastFramePins, string because)
+            {
+                // Given
+                // 10フレーム分の投球内容
+                var throwBalls = _nineFrames.Concat(new int[][] { lastFramePins }).SelectMany(x => x).ToArray();
+
+                // When
+                var target = _initialGame.ThrowBall(throwBalls);
+
+                // Then
+                target.IsComplete.Should().BeTrue();
+            }
+        }
     }
 
 
     namespace フレーム
     {
-        public static class TestData
-        {
-            public static int[][] NineFrames => Enumerable.Range(0, 9).Select(x => new[] { 1, 0 }).ToArray();
-
-        }
         public class フレームには２回分の投球を含めることができる
         {
+
+            private static readonly int[][] _nineFrames = Enumerable.Range(0, 9).Select(x => new[] { 1, 0 }).ToArray();
+
             private readonly Game _initialGame = new();
 
             [Fact]
@@ -71,18 +148,18 @@ namespace Bowling.MyVer2.Test
             }
 
             [Theory]
-            [InlineData(new int[] { 1 }, 1, "ストライク、スペア以外")]
-            [InlineData(new int[] { 1, 2 }, 1, "ストライク、スペア以外")]
-            [InlineData(new int[] { 1, 2, 3 }, 2, "ストライク、スペア以外")]
-            [InlineData(new int[] { 1, 2, 3, 4 }, 2, "ストライク、スペア以外")]
-            [InlineData(new int[] { 1, 2, 3, 4, 5 }, 3, "ストライク、スペア以外")]
-            [InlineData(new int[] { 10 }, 1, "ストライク")]
-            [InlineData(new int[] { 10, 10 }, 2, "ストライク")]
-            [InlineData(new int[] { 10, 10, 10 }, 3, "ストライク")]
+            [InlineData(new int[] { 1 }, 1, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 2 }, 1, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 2, 3 }, 2, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 2, 3, 4 }, 2, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 2, 3, 4, 5 }, 3, "スペア、ストライク以外")]
             [InlineData(new int[] { 1, 9 }, 1, "スペア")]
             [InlineData(new int[] { 1, 9, 1 }, 2, "スペア")]
             [InlineData(new int[] { 1, 9, 1, 9 }, 2, "スペア")]
             [InlineData(new int[] { 1, 9, 2, 8, 3 }, 3, "スペア")]
+            [InlineData(new int[] { 10 }, 1, "ストライク")]
+            [InlineData(new int[] { 10, 10 }, 2, "ストライク")]
+            [InlineData(new int[] { 10, 10, 10 }, 3, "ストライク")]
             internal void ピンを2回倒すごとにフレームが進む(int[] pins, int expectedFrameCount, string because)
             {
                 // Given
@@ -94,12 +171,18 @@ namespace Bowling.MyVer2.Test
 
             }
 
+        }
 
+        public class フレームに追加できるピンの合計数は10まで
+        {
+            private readonly Game _initialGame = new Game();
 
             [Theory]
             [InlineData(new int[] { 1, 10 })]
             [InlineData(new int[] { 2, 9 })]
-            internal void フレームに追加できるピンの合計数は10まで(int[] pins)
+            [InlineData(new int[] { 10, 3, 8 })]
+            [InlineData(new int[] { 1, 9, 4, 7 })]
+            internal void フレームのピンの合計数が11以上の場合は例外発生(int[] pins)
             {
                 // Given
                 // When
@@ -108,48 +191,7 @@ namespace Bowling.MyVer2.Test
                 // Then
                 act.Should().Throw<BowlingAppException>().WithMessage($"The total number of pins that can be added in a frame is limited to 10.(hitPinsInFrame=[*])");
             }
-
-
-
-            [Theory]
-            [InlineData(new int[] { 1, 0 }, "ストライク、スペア以外")]
-            [InlineData(new int[] { 10, 10, 10 }, "ストライク")]
-            [InlineData(new int[] { 1, 9, 1 }, "スペア")]
-            internal void すべての投球が終わった場合のフレーム数は10(int[] lastFramePins, string because)
-            {
-                // Given
-                // 10フレーム分の投球内容
-                var throwBalls = TestData.NineFrames.Concat(new int[][] { lastFramePins }).SelectMany(x => x).ToArray();
-
-                // When
-                var target = _initialGame.ThrowBall(throwBalls);
-
-                // Then
-                target.Frames.Count.Should().Be(10, because);
-
-            }
-
-
-            [Theory]
-            [InlineData(new int[] { 1, 0 }, "ストライク、スペア以外")]
-            [InlineData(new int[] { 10, 10, 10 }, "ストライク")]
-            [InlineData(new int[] { 1, 9, 1 }, "スペア")]
-            internal void _10フレーム完了後は投球できない(int[] lastFramePins, string because)
-            {
-                // Given
-                // 10フレーム分の投球内容
-                var throwBalls = TestData.NineFrames.Concat(new int[][] { lastFramePins }).SelectMany(x => x).ToArray();
-                var target = _initialGame.ThrowBall(throwBalls);
-
-                // When
-                var act = () => target.ThrowBall(1);
-
-                // Then
-                act.Should().Throw<BowlingAppException>(because).WithMessage("The game is already over.");
-
-            }
         }
-
     }
 
     namespace 得点を計算する

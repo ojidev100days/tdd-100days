@@ -7,7 +7,6 @@ namespace Bowling.MyVer2
     {
         private const int MAX_FRAME_NO = 10;
 
-
         private readonly HitPins _hitPins;
 
         public FrameEnumerable(HitPin[] hitPins)
@@ -18,47 +17,38 @@ namespace Bowling.MyVer2
         public IEnumerator<IFrame> GetEnumerator()
         {
             int currentFrameNo = 0; // 最終フレーム目を判定するために使用する
-            var pinsInFrame = new HitPins();
 
-            for (int i = 0; i < _hitPins.Count; i++)
+            int currentIndex = 0;
+            while (currentIndex < _hitPins.Count)
             {
-                var currentHitPin = _hitPins[i];
+                currentFrameNo++;
+                IFrame frame = Create(_hitPins, currentIndex, currentFrameNo);
 
-                // 現在倒したPinを保存
-                pinsInFrame = pinsInFrame.Add(currentHitPin);
+                Console.WriteLine($"[DEBUG] hitPins={_hitPins}, fn={currentFrameNo}, ci={currentIndex}, kps={frame.KnockedDownPins}, sps={frame.ScorePins}");
+                currentIndex += frame.KnockedDownPins.Count;
 
-                if (pinsInFrame.IsComplete)
-                {
-                    currentFrameNo++;
-                    if (pinsInFrame.IsStrike)
-                    {
-                        // Strike
-                        yield return CreateFrame(currentFrameNo, () => new StrikeFrame(_hitPins, i));
-                    }
-                    else if (pinsInFrame.IsSpare)
-                    {
-                        // Spare
-                        yield return CreateFrame(currentFrameNo, () => new SpareFrame(pinsInFrame, _hitPins, i));
-                    }
-                    else
-                    {
-                        // Normal
-                        yield return CreateFrame(currentFrameNo, () => new NormalFrame(pinsInFrame));
-                    }
+                yield return MAX_FRAME_NO < currentFrameNo
+                    ? throw new BowlingAppException($"The game is already over. (hitPins={_hitPins}, currentIndex={currentIndex})")
+                    : frame;
+            }
+        }
 
-                    // フレーム数が10を超えた時点で、処理を打ち切り
-                    if (MAX_FRAME_NO <= currentFrameNo) yield break;
-
-                    pinsInFrame = new HitPins();
-                }
+        private IFrame Create(HitPins hitPins, int currentIndex, int currentFrameNo)
+        {
+            IFrame CreateFrame(Func<IFrame> createFrameFunc)
+            {
+                return currentFrameNo == MAX_FRAME_NO
+                    ? new LastFrame(createFrameFunc.Invoke())
+                    : createFrameFunc.Invoke();
             }
 
-            if (pinsInFrame.Any())
-            {
-                // Normal
-                yield return CreateFrame(currentFrameNo, () => new NormalFrame(pinsInFrame));
-            }
+            var currentPin = hitPins[currentIndex];
+            if (currentPin.IsStrike) return CreateFrame(() => new StrikeFrame(_hitPins, currentIndex));
 
+            var currentFramePins = hitPins.Range(currentIndex, 2);
+            if (currentFramePins.IsSpare) return CreateFrame(() => new SpareFrame(_hitPins, currentIndex));
+
+            return CreateFrame(() => new NormalFrame(currentFramePins));
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -66,11 +56,5 @@ namespace Bowling.MyVer2
             return GetEnumerator();
         }
 
-        IFrame CreateFrame(int frameCount, Func<IFrame> createFrameFunc)
-        {
-            return frameCount == MAX_FRAME_NO
-                ? new LastFrame(createFrameFunc.Invoke())
-                : createFrameFunc.Invoke();
-        }
     }
 }

@@ -11,7 +11,7 @@ namespace Bowling.MyVer2
 
         public bool IsComplete => _hitPinsInFrame.Count == 2;
 
-        public int Score => ScorePins.Sum();
+        public int Score => IsComplete ? ScorePins.Sum() : 0;
 
         public HitPins KnockedDownPins => _hitPinsInFrame;
 
@@ -26,7 +26,7 @@ namespace Bowling.MyVer2
 
         public override string ToString()
         {
-            return $"[{_hitPinsInFrame[0]},{_hitPinsInFrame[1]}]";
+            return KnockedDownPins.ToString();
         }
 
     }

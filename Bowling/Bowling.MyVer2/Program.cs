@@ -10,13 +10,12 @@ Console.WriteLine("Bowling App 2");
 ShowGame("Game1", new Game(0, 1, 2, 3, 4, 5, 5, 5, 10, 5, 5, 4, 3, 2, 1, 0, 10, 8, 1));
 ShowGame("Game2", new Game(0, 1, 2, 3, 4, 5, 5, 5, 10, 5, 5, 4, 3, 2, 1, 0, 10, 10, 9, 8));
 ShowGame("Game3", new Game(0, 1, 2, 3, 4, 5, 5, 5, 10, 5, 5, 4, 3, 2, 1, 0, 10, 9, 1, 8));
-
-
+ShowGame("Game4", new Game(1, 9, 2, 8, 3));
 
 
 void ShowGame(string gameName, Game game) {
     Console.WriteLine("--------------------------------");
-    Console.WriteLine("Game1");
+    Console.WriteLine($"=== {gameName} ===");
     Console.WriteLine($"Game       : {game}");
     Console.WriteLine($"FrameScore : {string.Join(",", game.Frames.Select(s => s.Score))}");
     Console.WriteLine($"ScorePins  : {string.Join(",", game.Frames.Select(s => s.ScorePins))}");

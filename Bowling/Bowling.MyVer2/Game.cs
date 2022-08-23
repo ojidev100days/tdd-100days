@@ -15,6 +15,8 @@ namespace Bowling.MyVer2
 
         internal int Score => Frames.TakeWhile(x => x.IsComplete).Sum(x => x.Score);
 
+        public bool IsComplete => Frames.LastOrDefault() is LastFrame lastFrame && lastFrame.IsComplete;
+
         public Game() {
             _hitPins = new HitPin[] { };
             Frames = new List<IFrame>();
@@ -29,7 +31,7 @@ namespace Bowling.MyVer2
 
         internal Game ThrowBall(params HitPin[] hitPins)
         {
-            if (Frames.LastOrDefault() is LastFrame lastFrame && lastFrame.IsComplete) throw new BowlingAppException("The game is already over.");
+            //if (Frames.LastOrDefault() is LastFrame lastFrame && lastFrame.IsComplete) throw new BowlingAppException("The game is already over.");
             return new Game(_hitPins.Concat(hitPins).ToArray());
         }
 
