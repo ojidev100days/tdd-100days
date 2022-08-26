@@ -1,12 +1,29 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using static Bowling.MyVer2.HitPin;
 
 namespace Bowling.MyVer2.Frames
 {
     internal class SpareFrame : IFrame
     {
-        internal static readonly int MaxThrowCount = 2;
+        private static readonly int MaxThrowCount = 2;
         private static readonly int ThrowCountOfIncludedInScore = 1;
+
+
+        public static bool TryCreate(HitPins hitPins, int currentIndex, [MaybeNullWhen(false)] out SpareFrame result)
+        {
+
+            var framePins = hitPins.Range(currentIndex, 2);
+            
+            if (framePins.ThrowCount == MaxThrowCount && framePins.Sum() == HitPin.MaxHitPin)
+            {
+                result = new SpareFrame(hitPins, currentIndex);
+                return true;
+            }
+
+            result = null;
+            return false;
+        }
 
         private readonly HitPins _hitPins;
         private readonly int _currentIndex;
@@ -19,10 +36,10 @@ namespace Bowling.MyVer2.Frames
 
         public HitPins ScorePins => _hitPins.Range(_currentIndex, MaxThrowCount + ThrowCountOfIncludedInScore);
 
-        public SpareFrame(HitPins hitPins, int i)
+        public SpareFrame(HitPins hitPins, int currentIndex)
         {
             _hitPins = hitPins;
-            _currentIndex = i;
+            _currentIndex = currentIndex;
         }
 
         public override string ToString()

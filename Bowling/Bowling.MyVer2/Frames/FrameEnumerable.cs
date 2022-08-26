@@ -22,7 +22,7 @@ namespace Bowling.MyVer2.Frames
             while (currentThrowIndex < _hitPins.ThrowCount)
             {
                 currentFrameNo++;
-                IFrame frame = Create(_hitPins, currentThrowIndex, currentFrameNo);
+                IFrame frame = CreateFrame(_hitPins, currentThrowIndex, currentFrameNo);
 
                 Console.WriteLine($"[DEBUG] hitPins={_hitPins}, fn={currentFrameNo}, ci={currentThrowIndex}, kps={frame.KnockedDownPins}, sps={frame.ScorePins}");
                 currentThrowIndex += frame.KnockedDownPins.ThrowCount;
@@ -33,22 +33,23 @@ namespace Bowling.MyVer2.Frames
             }
         }
 
-        private IFrame Create(HitPins hitPins, int throwIndex, int frameNo)
+
+        private IFrame CreateFrame(HitPins hitPins, int currentIndex, int frameNo)
         {
-            IFrame CreateFrame(Func<IFrame> createFrameFunc)
+            static IFrame Create(int frameNo, IFrame frame)
             {
-                return frameNo == MAX_FRAME_NO
-                    ? new LastFrame(createFrameFunc.Invoke())
-                    : createFrameFunc.Invoke();
+                return frameNo == MAX_FRAME_NO ? new LastFrame(frame) : frame;
             }
 
-            var currentPin = hitPins[throwIndex];
-            if (currentPin.IsStrike) return CreateFrame(() => new StrikeFrame(_hitPins, throwIndex));
+            // TODO 個々の処理をListに突っ込んでぐるぐるしたい
 
-            var currentFramePins = hitPins.Range(throwIndex, 2);
-            if (currentFramePins.IsSpare) return CreateFrame(() => new SpareFrame(_hitPins, throwIndex));
+            if (StrikeFrame.TryCreate(hitPins, currentIndex, out var strikeFrame)) return Create(frameNo, strikeFrame);
 
-            return CreateFrame(() => new NormalFrame(currentFramePins));
+            if (SpareFrame.TryCreate(hitPins, currentIndex, out var spareFrame)) return Create(frameNo, spareFrame);
+
+            if (NormalFrame.TryCreate(hitPins, currentIndex, out var normalFrame)) return Create(frameNo, normalFrame);
+
+            throw new ArgumentException($"Cannot create frame. (hitPins={hitPins}, currentIndex={currentIndex})");
         }
 
         IEnumerator IEnumerable.GetEnumerator()

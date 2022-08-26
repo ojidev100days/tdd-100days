@@ -6,6 +6,14 @@ namespace Bowling.MyVer2.Frames
     {
         internal static readonly int MaxThrowCount = 2;
 
+        internal static bool TryCreate(HitPins hitPins, int currentIndex, out NormalFrame result)
+        {
+            var framePins = hitPins.Range(currentIndex, 2);
+            result = new NormalFrame(framePins);
+            return true;
+            
+        }
+
         private readonly HitPins _hitPinsInFrame;
 
         public bool IsComplete => _hitPinsInFrame.ThrowCount == MaxThrowCount;
@@ -27,6 +35,5 @@ namespace Bowling.MyVer2.Frames
         {
             return KnockedDownPins.ToString();
         }
-
     }
 }

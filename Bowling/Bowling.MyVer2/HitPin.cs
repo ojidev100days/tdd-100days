@@ -13,7 +13,7 @@ namespace Bowling.MyVer2
 
         public readonly int _pin;
 
-        public bool IsStrike => _pin == MaxHitPin;
+        public bool AllDowned => _pin == MaxHitPin;
 
         public HitPin(int pin)
         {
@@ -36,12 +36,6 @@ namespace Bowling.MyVer2
             private readonly IReadOnlyList<HitPin> _hitPins;
 
             public int ThrowCount => _hitPins.Count;
-
-            public bool IsSpare => ThrowCount == SpareFrame.MaxThrowCount && Sum() == MaxHitPin;
-
-            public bool IsStrike => ThrowCount == StrikeFrame.MaxThrowCount && Sum() == MaxHitPin;
-
-            public bool IsComplete => IsStrike || IsSpare || ThrowCount == NormalFrame.MaxThrowCount;
 
             public HitPin this[int i] => _hitPins[i];
 

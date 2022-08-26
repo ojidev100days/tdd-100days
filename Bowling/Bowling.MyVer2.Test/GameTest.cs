@@ -122,7 +122,7 @@ namespace Bowling.MyVer2.Test
                 var target = _initialGame.ThrowBall(throwBalls);
 
                 // Then
-                target.IsComplete.Should().BeTrue();
+                target.IsComplete.Should().BeTrue(because);
             }
         }
     }
