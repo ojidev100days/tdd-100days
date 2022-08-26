@@ -6,7 +6,7 @@ namespace Bowling.MyVer2.Frames
     {
         internal static readonly int MaxThrowCount = 2;
 
-        internal static bool TryCreate(HitPins hitPins, int currentIndex, out NormalFrame result)
+        internal static bool TryCreate(HitPins hitPins, int currentIndex, out IFrame result)
         {
             var framePins = hitPins.Range(currentIndex, 2);
             result = new NormalFrame(framePins);

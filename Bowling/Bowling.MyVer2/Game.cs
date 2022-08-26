@@ -27,7 +27,7 @@ namespace Bowling.MyVer2
         public Game(HitPins hitPins)
         {
             this._hitPins = hitPins;
-            this.Frames = new FrameEnumerable(_hitPins).ToList();
+            this.Frames = FrameFactory.Create(_hitPins).ToList();
         }
 
         internal Game ThrowBall(HitPins hitPins)

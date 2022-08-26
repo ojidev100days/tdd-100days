@@ -9,7 +9,7 @@ namespace Bowling.MyVer2.Frames
         private static readonly int ThrowCountOfIncludedInScore = 2;
 
 
-        public static bool TryCreate(HitPins hitPins, int currentIndex, [MaybeNullWhen(false)] out StrikeFrame result)
+        public static bool TryCreate(HitPins hitPins, int currentIndex, [MaybeNullWhen(false)] out IFrame result)
         {
             var currentPin = hitPins[currentIndex];
 
