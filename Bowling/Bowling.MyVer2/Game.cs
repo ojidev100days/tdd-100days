@@ -1,46 +1,49 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Bowling.MyVer2.Frames;
+using static Bowling.MyVer2.HitPin;
 
 namespace Bowling.MyVer2
 {
-    internal class Game : IEnumerable<IFrame>
+    internal class Game
     {
-        private int[] _hitPins = new int[0];
 
-        internal int Score => this.Where(x => x.IsComplete).Select(x => x.Score).Sum();
+        public static Game Of(params int[] hitPins)
+        {
+            return new Game(HitPins.Of(hitPins));
+        }
 
-        public Game() { }
+        private readonly HitPins _hitPins;
 
-        public Game(params int[] hitPins)
+        internal IReadOnlyList<IFrame> Frames { get; }
+
+        internal int Score => Frames.TakeWhile(x => x.IsComplete).Sum(x => x.Score);
+
+        public bool IsComplete => Frames.LastOrDefault() is LastFrame lastFrame && lastFrame.IsComplete;
+
+        public Game()
+        {
+            _hitPins = new HitPins();
+            Frames = new List<IFrame>();
+        }
+
+        public Game(HitPins hitPins)
         {
             this._hitPins = hitPins;
+            this.Frames = FrameFactory.Create(_hitPins).ToList();
         }
-                
+
+        internal Game ThrowBall(HitPins hitPins)
+        {
+            return new Game(_hitPins.Concat(hitPins));
+        }
 
         internal Game ThrowBall(params int[] hitPins)
         {
-            // TODO: 不正な値をはじきたい（1フレームに11pin以上はいる、とか）
-            return new Game(hitPins);
-        }
-
-
-        public IEnumerator<IFrame> GetEnumerator()
-        {
-            return new FrameEnumerable(_hitPins).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            return ThrowBall(HitPins.Of(hitPins));
         }
 
         public override string ToString()
         {
-            return string.Join("|", this);
+            return string.Join("|", Frames);
         }
     }
 }
