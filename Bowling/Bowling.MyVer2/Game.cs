@@ -5,6 +5,7 @@ namespace Bowling.MyVer2
 {
     internal class Game
     {
+
         public static Game Of(params int[] hitPins)
         {
             return new Game(HitPins.Of(hitPins));

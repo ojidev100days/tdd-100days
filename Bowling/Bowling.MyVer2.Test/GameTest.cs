@@ -148,19 +148,10 @@ namespace Bowling.MyVer2.Test
             }
 
             [Theory]
-            [InlineData(new int[] { 1 }, 1, "スペア、ストライク以外")]
-            [InlineData(new int[] { 1, 2 }, 1, "スペア、ストライク以外")]
-            [InlineData(new int[] { 1, 2, 3 }, 2, "スペア、ストライク以外")]
-            [InlineData(new int[] { 1, 2, 3, 4 }, 2, "スペア、ストライク以外")]
-            [InlineData(new int[] { 1, 2, 3, 4, 5 }, 3, "スペア、ストライク以外")]
-            [InlineData(new int[] { 1, 9 }, 1, "スペア")]
-            [InlineData(new int[] { 1, 9, 1 }, 2, "スペア")]
-            [InlineData(new int[] { 1, 9, 1, 9 }, 2, "スペア")]
-            [InlineData(new int[] { 1, 9, 2, 8, 3 }, 3, "スペア")]
             [InlineData(new int[] { 10 }, 1, "ストライク")]
             [InlineData(new int[] { 10, 10 }, 2, "ストライク")]
             [InlineData(new int[] { 10, 10, 10 }, 3, "ストライク")]
-            internal void ピンを2回倒すごとにフレームが進む(int[] pins, int expectedFrameCount, string because)
+            internal void ストライクの場合フレームが進む(int[] pins, int expectedFrameCount, string because)
             {
                 // Given
                 // When
@@ -171,6 +162,26 @@ namespace Bowling.MyVer2.Test
 
             }
 
+            [Theory]
+            [InlineData(new int[] { 1 }, 1, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 2 }, 1, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 2, 3 }, 2, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 2, 3, 4 }, 2, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 2, 3, 4, 5 }, 3, "スペア、ストライク以外")]
+            [InlineData(new int[] { 1, 9 }, 1, "スペア")]
+            [InlineData(new int[] { 1, 9, 1 }, 2, "スペア")]
+            [InlineData(new int[] { 1, 9, 1, 9 }, 2, "スペア")]
+            [InlineData(new int[] { 1, 9, 2, 8, 3 }, 3, "スペア")]
+            internal void ストライク以外の場合は2投するごとにフレームが進む(int[] pins, int expectedFrameCount, string because)
+            {
+                // Given
+                // When
+                var target = _initialGame.ThrowBall(pins);
+
+                // Then
+                target.Frames.Count.Should().Be(expectedFrameCount, because);
+
+            }
         }
 
         public class フレームに追加できるピンの合計数は10まで
@@ -180,8 +191,8 @@ namespace Bowling.MyVer2.Test
             [Theory]
             [InlineData(new int[] { 1, 10 })]
             [InlineData(new int[] { 2, 9 })]
-            [InlineData(new int[] { 10, 3, 8 })]
             [InlineData(new int[] { 1, 9, 4, 7 })]
+            [InlineData(new int[] { 10, 3, 8 })]
             internal void フレームのピンの合計数が11以上の場合は例外発生(int[] pins)
             {
                 // Given
@@ -193,7 +204,7 @@ namespace Bowling.MyVer2.Test
             }
         }
     }
-
+    
     namespace 得点を計算する
     {
 

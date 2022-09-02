@@ -10,14 +10,14 @@ namespace Bowling.MyVer2.Frames
         private static readonly int ThrowCountOfIncludedInScore = 1;
 
 
-        public static bool TryCreate(HitPins hitPins, int currentIndex, [MaybeNullWhen(false)] out IFrame result)
+        public static bool TryCreate(HitPins allHitPins, int currentIndex, [MaybeNullWhen(false)] out IFrame result)
         {
 
-            var framePins = hitPins.Range(currentIndex, 2);
+            var hitPins = allHitPins.Range(currentIndex, MaxThrowCount);
             
-            if (framePins.ThrowCount == MaxThrowCount && framePins.Sum() == HitPin.MaxHitPin)
+            if (hitPins.ThrowCount == MaxThrowCount && hitPins.IsAllKnockDown())
             {
-                result = new SpareFrame(hitPins, currentIndex);
+                result = new SpareFrame(allHitPins, currentIndex);
                 return true;
             }
 

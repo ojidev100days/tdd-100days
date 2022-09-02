@@ -6,12 +6,12 @@ namespace Bowling.MyVer2.Frames
     {
         internal static readonly int MaxThrowCount = 2;
 
-        internal static bool TryCreate(HitPins hitPins, int currentIndex, out IFrame result)
+        internal static bool TryCreate(HitPins allHitPins, int currentIndex, out IFrame result)
         {
-            var framePins = hitPins.Range(currentIndex, 2);
-            result = new NormalFrame(framePins);
+            var hitPins = allHitPins.Range(currentIndex, 2);
+            result = new NormalFrame(hitPins);
             return true;
-            
+
         }
 
         private readonly HitPins _hitPinsInFrame;
@@ -24,10 +24,10 @@ namespace Bowling.MyVer2.Frames
 
         public HitPins ScorePins => _hitPinsInFrame;
 
-        public NormalFrame(HitPins hitPinsInFrame)
+        public NormalFrame(HitPins hitPins)
         {
-            if (HitPin.MaxHitPin <= hitPinsInFrame.Sum()) throw new BowlingAppException($"The total number of pins that can be added in a frame is limited to 10.(hitPinsInFrame={hitPinsInFrame})");
-            _hitPinsInFrame = hitPinsInFrame;
+            if (hitPins.ExceededMaxPinsInFrame()) throw new BowlingAppException($"The total number of pins that can be added in a frame is limited to 10.(hitPinsInFrame={hitPins})");
+            _hitPinsInFrame = hitPins;
         }
 
 
